@@ -3,7 +3,7 @@ import express from 'express';
 import QRCode from 'qrcode';
 import { config } from './src/config.js';
 import { logger } from './src/utils/logger.js';
-import { connectToWhatsApp, getCurrentQR, requestPairingCode } from './src/modules/connection.js';
+import { connectToWhatsApp, getCurrentQR, requestPairingCode, getBotId } from './src/modules/connection.js';
 import { initializeDatabase } from './src/database/db.js';
 import { loadCommands } from './src/modules/commandHandler.js';
 

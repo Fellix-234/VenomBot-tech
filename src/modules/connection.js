@@ -16,6 +16,7 @@ import { deletedMessages } from '../utils/cache.js';
 let sock;
 let qrGenerated = false;
 let currentQR = null;
+let botId = null;
 
 /**
  * Get current QR code data
@@ -77,6 +78,35 @@ export const connectToWhatsApp = async () => {
       logger.info(`Bot: ${config.bot.name} v${config.bot.version}`);
       qrGenerated = false;
       currentQR = null;
+
+      // Capture bot ID
+      botId = sock.user?.id?.split(':')[0];
+      logger.info(`🔑 Session ID: ${botId}`);
+
+      // Send welcome message to owner
+      if (config.bot.owner) {
+        try {
+          const ownerJid = config.bot.owner.includes('@') ? config.bot.owner : `${config.bot.owner}@s.whatsapp.net`;
+          const welcomeMsg = `╔════════════════════════════════════╗
+║                                ║
+║     ✅ ${config.bot.name} Connected!         ║
+║                                ║
+║  Session ID:                   ║
+║  ${botId}  ║
+║                                ║
+║  Version: ${config.bot.version}                  ║
+║  Prefix: ${config.bot.prefix}                     ║
+║                                ║
+║  Type !help to see commands    ║
+║                                ║
+╚════════════════════════════════════╝`;
+
+          await sock.sendMessage(ownerJid, { text: welcomeMsg });
+          logger.success('📨 Welcome message sent to owner');
+        } catch (error) {
+          logger.error('Failed to send welcome message:', error.message);
+        }
+      }
     }
   });
 
@@ -119,11 +149,6 @@ export const connectToWhatsApp = async () => {
 
   return sock;
 };
-
-/**
- * Get socket instance
- */
-export const getSocket = () => sock;
 
 /**
  * Send message
@@ -217,6 +242,11 @@ export const getProfilePicture = async (jid) => {
  * Get socket instance
  */
 export const getSocket = () => sock;
+
+/**
+ * Get bot ID/session
+ */
+export const getBotId = () => botId;
 
 /**
  * Request pairing code for phone number
