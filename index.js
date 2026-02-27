@@ -8,7 +8,7 @@ import { initializeDatabase } from './src/database/db.js';
 import { loadCommands } from './src/modules/commandHandler.js';
 
 const app = express();
-const PORT = process.env.PORT || 3001;
+const PORT = process.env.PORT || 3000;
 
 app.use(express.json());
 
@@ -294,7 +294,7 @@ const server = app.listen(PORT, '0.0.0.0', () => {
 server.on('error', (error) => {
   if (error.code === 'EADDRINUSE') {
     logger.error(`❌ Port ${PORT} is already in use!`);
-    logger.error(`Try using PORT=3002 node index.js`);
+    logger.error(`Try using PORT=3001 node index.js`);
     process.exit(1);
   } else {
     logger.error('Server error:', error);
