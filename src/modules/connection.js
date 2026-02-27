@@ -249,14 +249,35 @@ export const getSocket = () => sock;
 export const getBotId = () => botId;
 
 /**
+ * Create temporary unauthenticated socket for pairing code generation
+ */
+const createPairingSocket = async () => {
+  try {
+    const { version } = await fetchLatestBaileysVersion();
+    
+    const tempSock = makeWASocket({
+      version,
+      logger: pino({ level: 'silent' }),
+      printQRInTerminal: false,
+      browser: Browsers.ubuntu('VenomBot'),
+      getMessage: async (key) => {
+        return { conversation: '' };
+      },
+    });
+
+    return tempSock;
+  } catch (error) {
+    logger.error('Failed to create pairing socket:', error.message);
+    throw error;
+  }
+};
+
+/**
  * Request pairing code for phone number
  */
 export const requestPairingCode = async (phoneNumber) => {
+  let tempSock = null;
   try {
-    if (!sock) {
-      throw new Error('WhatsApp socket not connected yet. Please wait and try again.');
-    }
-
     // Format phone number: remove any non-digits
     const cleaned = phoneNumber.toString().replace(/\D/g, '');
     
@@ -266,21 +287,27 @@ export const requestPairingCode = async (phoneNumber) => {
 
     logger.info(`📱 Requesting pairing code for: ${cleaned}`);
     
-    // Try requestPhoneNumberCode method (works with Baileys 6.7.8+)
+    // Create temporary unauthenticated socket for pairing
+    tempSock = await createPairingSocket();
+    
+    // Wait a moment for socket initialization
+    await new Promise(resolve => setTimeout(resolve, 500));
+    
     let code;
     
-    // Check if method exists and use it
-    if (typeof sock.requestPhoneNumberCode === 'function') {
-      code = await sock.requestPhoneNumberCode(cleaned);
-    } else if (typeof sock.requestPairingCode === 'function') {
-      code = await sock.requestPairingCode(cleaned);
+    // Try requestPhoneNumberCode method (Baileys 6.7.8+)
+    if (typeof tempSock.requestPhoneNumberCode === 'function') {
+      logger.info('Using requestPhoneNumberCode method');
+      code = await tempSock.requestPhoneNumberCode(cleaned);
+    } else if (typeof tempSock.requestPairingCode === 'function') {
+      logger.info('Using requestPairingCode method');
+      code = await tempSock.requestPairingCode(cleaned);
     } else {
-      // Fallback: generate a code locally for testing
-      throw new Error('Pairing code method not available. Try QR code instead.');
+      throw new Error('Pairing code methods not available in this Baileys version. Please use QR code instead.');
     }
     
     if (!code) {
-      throw new Error('Failed to generate pairing code');
+      throw new Error('Failed to generate pairing code from WhatsApp');
     }
 
     logger.success(`✅ Pairing code generated: ${code}`);
@@ -288,5 +315,14 @@ export const requestPairingCode = async (phoneNumber) => {
   } catch (error) {
     logger.error('Pairing code error:', error.message);
     throw new Error(`Pairing failed: ${error.message}`);
+  } finally {
+    // Clean up temporary socket
+    if (tempSock) {
+      try {
+        await tempSock.end();
+      } catch (e) {
+        // Socket cleanup error - ignore
+      }
+    }
   }
 };

@@ -936,7 +936,8 @@ app.get('/session', async (req, res) => {
           // Show loading state
           const button = event.target;
           button.disabled = true;
-          button.textContent = '⏳ Generating...';
+          button.textContent = '⏳ Requesting from WhatsApp...';
+          showStatus('⏳ Connecting to WhatsApp servers...', 'info');
 
           // Call API to get real pairing code from WhatsApp
           fetch('/api/pairing-code', {
@@ -956,14 +957,20 @@ app.get('/session', async (req, res) => {
           })
           .then(data => {
             button.disabled = false;
-            button.textContent = '⚡ Generate Code';
+            button.textContent = '<i class="fas fa-bolt"></i> Generate';
 
             if (data.success) {
-              // Format the code for display
-              const formattedCode = data.code ? data.code.toString() : '';
+              // Format the code for display - ensure it's a string
+              const formattedCode = String(data.code || '').trim();
+              
+              if (!formattedCode) {
+                throw new Error('No code received from server');
+              }
+              
               document.getElementById('pairingCode').textContent = formattedCode;
               document.getElementById('pairingCode').classList.remove('code-placeholder');
-              showStatus('✅ Code generated! Valid for 60 seconds', 'success');
+              showStatus('✅ Real WhatsApp pairing code generated! Valid for 60 seconds.', 'success');
+              console.log('Generated pairing code:', formattedCode);
               startCodeTimer();
             } else {
               showStatus('❌ ' + (data.error || 'Failed to generate code'), 'error');
@@ -971,9 +978,19 @@ app.get('/session', async (req, res) => {
           })
           .catch(error => {
             button.disabled = false;
-            button.textContent = '⚡ Generate Code';
-            showStatus('❌ Error: ' + error.message, 'error');
-            console.error('Pairing error:', error);
+            button.textContent = '<i class="fas fa-bolt"></i> Generate';
+            console.error('Pairing code error:', error);
+            
+            let errorMsg = error.message;
+            
+            // Provide helpful error messages
+            if (errorMsg.includes('Pairing')) {
+              errorMsg = 'Pairing code not available. Try using the QR code method instead.';
+            } else if (errorMsg.includes('not available')) {
+              errorMsg = 'WhatsApp pairing not available in this Baileys version. Use QR code instead.';
+            }
+            
+            showStatus('❌ Error: ' + errorMsg, 'error');
           });
         }
 
