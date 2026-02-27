@@ -52,7 +52,8 @@ export const connectToWhatsApp = async () => {
       if (!qrGenerated) {
         logger.info('📱 Scan QR code to login:');
         qrcode.generate(qr, { small: true });
-        logger.info('🌐 Or visit: http://localhost:'+process.env.PORT+'/qr to scan from browser');
+        const renderUrl = process.env.RENDER_EXTERNAL_URL || `http://localhost:${process.env.PORT || 3000}`;
+        logger.info(`🌐 Or visit: ${renderUrl}/qr to scan from browser`);
         qrGenerated = true;
       }
     }
