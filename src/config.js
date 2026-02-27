@@ -52,5 +52,5 @@ export const config = {
   },
 
   // Admin/Owner permissions
-  admins: [process.env.OWNER_NUMBER],
+  admins: process.env.OWNER_NUMBER ? [process.env.OWNER_NUMBER] : [],
 };

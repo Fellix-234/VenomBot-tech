@@ -18,6 +18,12 @@ export const loadCommands = async () => {
   try {
     const files = fs.readdirSync(commandsPath).filter(file => file.endsWith('.js'));
     
+    if (files.length === 0) {
+      logger.warn('⚠️  No command files found in commands folder');
+      return;
+    }
+    
+    let loadedCount = 0;
     for (const file of files) {
       try {
         const command = await import(`../commands/${file}`);
@@ -34,15 +40,17 @@ export const loadCommands = async () => {
           }
           
           logger.success(`✓ Loaded command: ${command.default.name}`);
+          loadedCount++;
         }
       } catch (error) {
         logger.error(`Failed to load command ${file}:`, error.message);
       }
     }
     
-    logger.info(`📦 Loaded ${commands.size} commands`);
+    logger.info(`📦 Loaded ${loadedCount} commands out of ${files.length} files`);
   } catch (error) {
-    logger.error('Error loading commands:', error);
+    logger.error('Error loading commands:', error.message);
+    logger.warn('⚠️  Bot will run with no commands loaded');
   }
 };
 

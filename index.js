@@ -59,8 +59,10 @@ const main = async () => {
     logger.success('✨ Bot is ready!');
     
   } catch (error) {
-    logger.error('Failed to start bot:', error);
-    process.exit(1);
+    logger.error('Failed to start bot:', error.message);
+    logger.error('Stack:', error.stack);
+    // Don't exit immediately, allow graceful shutdown
+    setTimeout(() => process.exit(1), 5000);
   }
 };
 

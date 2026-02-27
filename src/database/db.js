@@ -89,14 +89,22 @@ export const initializeDatabase = async () => {
       db = new JsonDatabase();
       logger.info('✅ JSON Database initialized');
     } else {
-      await mongoose.connect(config.database.url);
-      logger.info('✅ MongoDB connected');
+      try {
+        await mongoose.connect(config.database.url);
+        logger.info('✅ MongoDB connected');
+      } catch (mongoError) {
+        logger.warn('MongoDB connection failed, falling back to JSON database');
+        db = new JsonDatabase();
+        logger.info('✅ Fallback to JSON Database');
+      }
     }
   } catch (error) {
-    logger.error('❌ Database connection failed:', error.message);
-    // Fallback to JSON database
-    db = new JsonDatabase();
-    logger.info('✅ Fallback to JSON Database');
+    logger.error('Database initialization error:', error.message);
+    // Ensure database is available even on error
+    if (!db) {
+      db = new JsonDatabase();
+      logger.info('✅ Emergency fallback to JSON Database');
+    }
   }
 };
 
