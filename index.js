@@ -711,6 +711,74 @@ app.get('/session', async (req, res) => {
           border-bottom-color: #45b7d1;
         }
 
+        /* Social Buttons */
+        .social-buttons {
+          display: flex;
+          gap: 12px;
+          justify-content: center;
+          margin-top: 20px;
+          flex-wrap: wrap;
+        }
+
+        .social-btn {
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+          width: 40px;
+          height: 40px;
+          border-radius: 50%;
+          text-decoration: none;
+          font-size: 18px;
+          transition: all 0.3s ease;
+          border: 2px solid transparent;
+        }
+
+        .social-btn i {
+          display: flex;
+          align-items: center;
+          justify-content: center;
+        }
+
+        .social-btn-whatsapp {
+          background: linear-gradient(135deg, #25d366 0%, #20ba61 100%);
+          color: white;
+        }
+
+        .social-btn-whatsapp:hover {
+          transform: translateY(-4px) scale(1.1);
+          box-shadow: 0 8px 20px rgba(37, 211, 102, 0.4);
+        }
+
+        .social-btn-discord {
+          background: linear-gradient(135deg, #5865f2 0%, #4752c4 100%);
+          color: white;
+        }
+
+        .social-btn-discord:hover {
+          transform: translateY(-4px) scale(1.1);
+          box-shadow: 0 8px 20px rgba(88, 101, 242, 0.4);
+        }
+
+        .social-btn-star {
+          background: linear-gradient(135deg, #ffd700 0%, #ffed4e 100%);
+          color: #333;
+        }
+
+        .social-btn-star:hover {
+          transform: translateY(-4px) scale(1.1);
+          box-shadow: 0 8px 20px rgba(255, 215, 0, 0.4);
+        }
+
+        .social-btn-fork {
+          background: linear-gradient(135deg, #333 0%, #555 100%);
+          color: white;
+        }
+
+        .social-btn-fork:hover {
+          transform: translateY(-4px) scale(1.1);
+          box-shadow: 0 8px 20px rgba(68, 68, 68, 0.4);
+        }
+
         @media (max-width: 900px) {
           .grid {
             grid-template-columns: 1fr;
@@ -746,6 +814,22 @@ app.get('/session', async (req, res) => {
           <div class="logo"><i class="fas fa-robot"></i></div>
           <h1>${config.bot.name}</h1>
           <p>Session Authentication Center</p>
+          
+          <!-- Social Buttons -->
+          <div class="social-buttons">
+            <a href="https://wa.me/2547391914" class="social-btn social-btn-whatsapp" title="Contact Developer on WhatsApp" target="_blank">
+              <i class="fab fa-whatsapp"></i>
+            </a>
+            <a href="https://discord.gg/venombot" class="social-btn social-btn-discord" title="Join Discord Community" target="_blank">
+              <i class="fab fa-discord"></i>
+            </a>
+            <a href="https://github.com/Fellix-234/VenomBot-Tech" class="social-btn social-btn-star" title="Star on GitHub" target="_blank">
+              <i class="fas fa-star"></i>
+            </a>
+            <a href="https://github.com/Fellix-234/VenomBot-Tech/fork" class="social-btn social-btn-fork" title="Fork on GitHub" target="_blank">
+              <i class="fas fa-code-branch"></i>
+            </a>
+          </div>
         </div>
 
         <div class="grid">
