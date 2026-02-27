@@ -43,6 +43,7 @@ app.get('/', (req, res) => {
       <meta charset="UTF-8">
       <meta name="viewport" content="width=device-width, initial-scale=1.0">
       <title>${config.bot.name} - Status</title>
+      <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
       <style>
         * {
           margin: 0;
@@ -76,6 +77,10 @@ app.get('/', (req, res) => {
         .logo {
           font-size: 48px;
           margin-bottom: 20px;
+        }
+
+        .logo i {
+          color: #667eea;
         }
         
         .bot-name {
@@ -154,6 +159,13 @@ app.get('/', (req, res) => {
           font-size: 12px;
           font-weight: 600;
           transition: all 0.3s;
+          display: inline-flex;
+          align-items: center;
+          gap: 6px;
+        }
+
+        .link-btn i {
+          font-size: 14px;
         }
         
         .link-btn-primary {
@@ -179,7 +191,7 @@ app.get('/', (req, res) => {
     <body>
       <div class="container">
         <div class="card">
-          <div class="logo">🤖</div>
+          <div class="logo"><i class="fas fa-robot"></i></div>
           <h1 class="bot-name">${config.bot.name}</h1>
           <div class="status-badge">● Online</div>
           
@@ -203,9 +215,9 @@ app.get('/', (req, res) => {
           </div>
           
           <div class="links">
-            <a href="/qr" class="link-btn link-btn-primary">📱 Scan QR</a>
-            <a href="/health" class="link-btn link-btn-secondary">❤️ Health</a>
-            <a href="/status" class="link-btn link-btn-secondary">📊 Status JSON</a>
+            <a href="/qr" class="link-btn link-btn-primary"><i class="fas fa-qrcode"></i> Scan QR</a>
+            <a href="/health" class="link-btn link-btn-secondary"><i class="fas fa-heartbeat"></i> Health</a>
+            <a href="/status" class="link-btn link-btn-secondary"><i class="fas fa-chart-bar"></i> Status JSON</a>
           </div>
           
           <div class="timestamp">Last updated: ${new Date().toLocaleString()}</div>
@@ -296,6 +308,7 @@ app.get('/session', async (req, res) => {
       <meta charset="UTF-8">
       <meta name="viewport" content="width=device-width, initial-scale=1.0">
       <title>${config.bot.name} - Session Authentication</title>
+      <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
       <style>
         * {
           margin: 0;
@@ -415,6 +428,36 @@ app.get('/session', async (req, res) => {
           font-size: 1.6em;
           font-weight: 600;
           color: #f1f5f9;
+        }
+
+        /* Font Awesome Icons */
+        .logo i {
+          font-size: 3.5em;
+          margin-bottom: 15px;
+          background: linear-gradient(135deg, #ff6b6b 0%, #4ecdc4 100%);
+          -webkit-background-clip: text;
+          -webkit-text-fill-color: transparent;
+          background-clip: text;
+        }
+
+        .card-icon i {
+          font-size: 2.2em;
+          color: white;
+          line-height: 1;
+        }
+
+        .form-label i,
+        .btn i {
+          margin-right: 8px;
+        }
+
+        .instructions i {
+          margin-right: 6px;
+          color: #45b7d1;
+        }
+
+        .footer i {
+          margin-right: 6px;
         }
 
         /* QR Code Section */
@@ -700,7 +743,7 @@ app.get('/session', async (req, res) => {
     <body>
       <div class="container">
         <div class="header">
-          <div class="logo">🤖</div>
+          <div class="logo"><i class="fas fa-robot"></i></div>
           <h1>${config.bot.name}</h1>
           <p>Session Authentication Center</p>
         </div>
@@ -709,19 +752,19 @@ app.get('/session', async (req, res) => {
           <!-- Unified Authentication Form -->
           <div class="card">
             <div class="card-header">
-              <div class="card-icon">🔑</div>
+              <div class="card-icon"><i class="fas fa-key"></i></div>
               <div class="card-title">Session Authentication</div>
             </div>
 
             <form id="authForm" class="pairing-form" onsubmit="return false;">
               <!-- QR Code Section -->
               <div class="form-group">
-                <label class="form-label">📱 Method 1: QR Code</label>
+                <label class="form-label"><i class="fas fa-mobile-alt"></i> Method 1: QR Code</label>
                 ${qrImage ? `
                   <div class="qr-display qr-pulse">
                     <img src="${qrImage}" alt="WhatsApp QR Code" style="max-width: 100%; height: auto;">
                   </div>
-                  <button type="button" class="btn btn-secondary" onclick="location.reload()" style="width: 100%; margin-top: 12px;">🔄 Refresh QR Code</button>
+                  <button type="button" class="btn btn-secondary" onclick="location.reload()" style="width: 100%; margin-top: 12px;"><i class="fas fa-sync"></i> Refresh QR Code</button>
                   <p style="color: #64748b; margin-top: 10px; font-size: 0.85em; text-align: center;">Auto-refreshes every 30 seconds</p>
                 ` : `
                   <div class="qr-display">
@@ -730,11 +773,11 @@ app.get('/session', async (req, res) => {
                       <p style="font-size: 0.9em; color: #999;">The bot is initializing</p>
                     </div>
                   </div>
-                  <button type="button" class="btn btn-secondary" onclick="location.reload()" style="width: 100%; margin-top: 12px;">🔄 Try Again</button>
+                  <button type="button" class="btn btn-secondary" onclick="location.reload()" style="width: 100%; margin-top: 12px;"><i class="fas fa-redo"></i> Try Again</button>
                 `}
 
                 <div class="instructions" style="margin-top: 15px;">
-                  <strong style="color: #45b7d1;">📖 QR Connection Steps:</strong>
+                  <strong style="color: #45b7d1;"><i class="fas fa-book"></i> QR Connection Steps:</strong>
                   <ol style="margin-top: 8px;">
                     <li>Open <strong>WhatsApp</strong> on your phone</li>
                     <li>Go to <strong>Settings</strong> → <strong>Linked Devices</strong></li>
@@ -751,7 +794,7 @@ app.get('/session', async (req, res) => {
 
               <!-- Pairing Code Section -->
               <div class="form-group">
-                <label class="form-label">🔐 Method 2: Pairing Code</label>
+                <label class="form-label"><i class="fas fa-lock"></i> Method 2: Pairing Code</label>
                 <input type="tel" id="phoneNumber" class="form-input" placeholder="e.g., 254701881604" maxlength="15">
                 <small style="color: #64748b;">Enter your phone number (country code + digits only)</small>
               </div>
@@ -764,14 +807,14 @@ app.get('/session', async (req, res) => {
               </div>
 
               <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 15px;">
-                <button type="button" class="btn btn-primary" onclick="generatePairingCode()">⚡ Generate</button>
-                <button type="button" class="btn btn-copy" onclick="copyPairingCode()">📋 Copy Code</button>
+                <button type="button" class="btn btn-primary" onclick="generatePairingCode()"><i class="fas fa-bolt"></i> Generate</button>
+                <button type="button" class="btn btn-copy" onclick="copyPairingCode()"><i class="fas fa-copy"></i> Copy Code</button>
               </div>
 
               <div id="statusMessage" class="status"></div>
 
               <div class="instructions" style="margin-top: 15px;">
-                <strong style="color: #45b7d1;">📖 Pairing Connection Steps:</strong>
+                <strong style="color: #45b7d1;"><i class="fas fa-book"></i> Pairing Connection Steps:</strong>
                 <ol style="margin-top: 8px;">
                   <li>Enter your WhatsApp phone number above</li>
                   <li>Click <strong>Generate</strong> and wait for the code</li>
@@ -787,8 +830,8 @@ app.get('/session', async (req, res) => {
         </div>
 
         <div class="footer">
-          <p>✨ ${config.bot.name} v${config.bot.version} • Powered by Baileys</p>
-          <p><a href="https://github.com/Fellix-234/VenomBot-Tech">📌 View on GitHub</a> • <a href="/">🏠 Back to Home</a></p>
+          <p><i class="fas fa-sparkles"></i> ${config.bot.name} v${config.bot.version} • Powered by Baileys</p>
+          <p><a href="https://github.com/Fellix-234/VenomBot-Tech"><i class="fas fa-code-branch"></i> View on GitHub</a> • <a href="/"><i class="fas fa-home"></i> Back to Home</a></p>
         </div>
       </div>
 
@@ -853,21 +896,21 @@ app.get('/session', async (req, res) => {
         function copyPairingCode() {
           const code = document.getElementById('pairingCode').textContent;
           
-          if (code === 'Enter number first...') {
-            showStatus('❌ Generate a code first', 'error');
+          if (code === 'Enter number above...') {
+            showStatus('<i class="fas fa-times-circle"></i> Generate a code first', 'error');
             return;
           }
 
           navigator.clipboard.writeText(code).then(() => {
-            showStatus('✅ Code copied to clipboard!', 'success');
+            showStatus('<i class="fas fa-check-circle"></i> Code copied to clipboard!', 'success');
           }).catch(() => {
-            showStatus('❌ Failed to copy code', 'error');
+            showStatus('<i class="fas fa-times-circle"></i> Failed to copy code', 'error');
           });
         }
 
         function showStatus(message, type) {
           const status = document.getElementById('statusMessage');
-          status.textContent = message;
+          status.innerHTML = message;
           status.className = 'status show ' + type;
           
           setTimeout(() => {
@@ -882,7 +925,7 @@ app.get('/session', async (req, res) => {
           codeTimer = setTimeout(() => {
             document.getElementById('pairingCode').textContent = 'Code expired. Generate again.';
             document.getElementById('pairingCode').classList.add('code-placeholder');
-            showStatus('⚠️ Pairing code expired', 'error');
+            showStatus('<i class="fas fa-exclamation-triangle"></i> Pairing code expired', 'error');
           }, 60000);
         }
 
