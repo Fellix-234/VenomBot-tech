@@ -220,11 +220,27 @@ app.get('/qr', async (req, res) => {
 });
 
 // Start HTTP server first (for Render port detection)
-app.listen(PORT, '0.0.0.0', () => {
+const server = app.listen(PORT, '0.0.0.0', () => {
   logger.info(`🌐 HTTP server running on port ${PORT}`);
-  logger.info(`📱 Scan QR: https://your-app.onrender.com/qr`);
-  
-  // Now start the bot
+  logger.info(`📱 Scan QR: http://localhost:${PORT}/qr`);
+  logger.info('⏳ Bot is starting in the background...\n');
+});
+
+// Handle server errors
+server.on('error', (error) => {
+  if (error.code === 'EADDRINUSE') {
+    logger.error(`❌ Port ${PORT} is already in use!`);
+    logger.error(`Try killing the process: lsof -i :${PORT} | grep LISTEN | awk '{print $2}' | xargs kill -9`);
+    logger.error(`Or use a different port: PORT=3001 node start.js`);
+    process.exit(1);
+  } else {
+    logger.error('Server error:', error);
+    process.exit(1);
+  }
+});
+
+// Start bot asynchronously (after HTTP server is listening)
+setImmediate(() => {
   startBot();
 });
 
@@ -260,11 +276,12 @@ const startBot = async () => {
   } catch (error) {
     logger.error('Failed to start bot:', error.message);
     logger.error('Stack:', error.stack);
-    // Don't exit - keep HTTP server running for health checks
+    logger.warn('⚠️  Bot will retry in 10 seconds (HTTP server still active)');
+    // Keep HTTP server running, retry bot after delay
     setTimeout(() => {
-      logger.info('Retrying bot connection...');
+      logger.info('🔄 Retrying bot connection...');
       startBot();
-    }, 10000); // Retry after 10 seconds
+    }, 10000);
   }
 };
 
