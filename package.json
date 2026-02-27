@@ -2,12 +2,10 @@
   "name": "venombot-tech",
   "version": "2.0.0",
   "description": "Professional WhatsApp Bot built with Baileys",
-  "main": "start.js",
+  "main": "index.js",
   "type": "module",
   "scripts": {
-    "start": "node start.js",
-    "bot": "node index.js",
-    "server": "node server.js",
+    "start": "node index.js",
     "dev": "nodemon index.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },

@@ -3,7 +3,7 @@ services:
     name: venombot-tech
     env: node
     buildCommand: yarn install
-    startCommand: node start.js
+    startCommand: node index.js
     envVars:
       - key: NODE_ENV
         value: production
