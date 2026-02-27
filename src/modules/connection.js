@@ -254,12 +254,39 @@ export const getBotId = () => botId;
 export const requestPairingCode = async (phoneNumber) => {
   try {
     if (!sock) {
-      throw new Error('Socket not initialized');
+      throw new Error('WhatsApp socket not connected yet. Please wait and try again.');
     }
-    const code = await sock.requestPairingCode(phoneNumber);
+
+    // Format phone number: remove any non-digits
+    const cleaned = phoneNumber.toString().replace(/\D/g, '');
+    
+    if (cleaned.length < 10 || cleaned.length > 15) {
+      throw new Error('Phone number must be 10-15 digits');
+    }
+
+    logger.info(`📱 Requesting pairing code for: ${cleaned}`);
+    
+    // Try requestPhoneNumberCode method (works with Baileys 6.7.8+)
+    let code;
+    
+    // Check if method exists and use it
+    if (typeof sock.requestPhoneNumberCode === 'function') {
+      code = await sock.requestPhoneNumberCode(cleaned);
+    } else if (typeof sock.requestPairingCode === 'function') {
+      code = await sock.requestPairingCode(cleaned);
+    } else {
+      // Fallback: generate a code locally for testing
+      throw new Error('Pairing code method not available. Try QR code instead.');
+    }
+    
+    if (!code) {
+      throw new Error('Failed to generate pairing code');
+    }
+
+    logger.success(`✅ Pairing code generated: ${code}`);
     return code;
   } catch (error) {
-    logger.error('Error requesting pairing code:', error.message);
-    throw error;
+    logger.error('Pairing code error:', error.message);
+    throw new Error(`Pairing failed: ${error.message}`);
   }
 };

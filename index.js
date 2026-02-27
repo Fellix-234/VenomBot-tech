@@ -765,15 +765,19 @@ app.get('/session', async (req, res) => {
               <div id="statusMessage" class="status"></div>
 
               <div class="instructions">
-                <strong>📖 Pairing Steps:</strong>
+                <strong>📖 How to Use Pairing Code:</strong>
                 <ol>
-                  <li>Enter your WhatsApp phone number</li>
-                  <li>Click <strong>Generate Code</strong></li>
+                  <li>Enter your WhatsApp phone number (with country code)</li>
+                  <li>Click <strong>Generate Code</strong> and wait for the code</li>
                   <li>Open <strong>WhatsApp</strong> on your phone</li>
                   <li>Go to <strong>Settings</strong> → <strong>Linked Devices</strong></li>
                   <li>Tap <strong>Link with Phone Number</strong></li>
-                  <li>Paste the generated code</li>
+                  <li>When asked, enter the generated code</li>
+                  <li>Code is valid for 60 seconds only</li>
                 </ol>
+                <p style="margin-top: 12px; color: #34d399; font-size: 0.85em;">
+                  💡 Tip: If pairing code doesn't work, use the <strong>QR Code</strong> method instead (left side)
+                </p>
               </div>
             </form>
           </div>
@@ -795,7 +799,7 @@ app.get('/session', async (req, res) => {
           }
 
           if (!/^\\d{10,15}$/.test(phoneNumber)) {
-            showStatus('❌ Invalid phone number format', 'error');
+            showStatus('❌ Invalid format. Use only digits (10-15 digits including country code)', 'error');
             return;
           }
 
@@ -812,13 +816,22 @@ app.get('/session', async (req, res) => {
             },
             body: JSON.stringify({ phoneNumber })
           })
-          .then(response => response.json())
+          .then(response => {
+            if (!response.ok) {
+              return response.json().then(data => {
+                throw new Error(data.error || 'Server error');
+              });
+            }
+            return response.json();
+          })
           .then(data => {
             button.disabled = false;
             button.textContent = '⚡ Generate Code';
 
             if (data.success) {
-              document.getElementById('pairingCode').textContent = data.code;
+              // Format the code for display
+              const formattedCode = data.code ? data.code.toString() : '';
+              document.getElementById('pairingCode').textContent = formattedCode;
               document.getElementById('pairingCode').classList.remove('code-placeholder');
               showStatus('✅ Code generated! Valid for 60 seconds', 'success');
               startCodeTimer();
@@ -830,6 +843,7 @@ app.get('/session', async (req, res) => {
             button.disabled = false;
             button.textContent = '⚡ Generate Code';
             showStatus('❌ Error: ' + error.message, 'error');
+            console.error('Pairing error:', error);
           });
         }
 
