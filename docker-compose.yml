@@ -1,0 +1,27 @@
+version: '3.8'
+
+services:
+  venombot:
+    build: .
+    container_name: venombot
+    restart: always
+    environment:
+      - PREFIX=!
+      - BOT_NAME=VenomBot
+      - OWNER_NUMBER=${OWNER_NUMBER}
+      - TIMEZONE=Africa/Nairobi
+      - AUTO_READ=true
+      - AUTO_TYPING=true
+      - AUTO_REACT=true
+    volumes:
+      - ./auth_info_baileys:/app/auth_info_baileys
+      - ./logs:/app/logs
+      - ./assets:/app/assets
+    ports:
+      - "3000:3000"
+    networks:
+      - venombot-network
+
+networks:
+  venombot-network:
+    driver: bridge

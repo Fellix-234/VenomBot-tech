@@ -1,0 +1,52 @@
+{
+  "name": "VenomBot-Tech",
+  "description": "Professional WhatsApp Bot built with Baileys",
+  "repository": "https://github.com/VenomBot-Tech/VenomBot-Tech",
+  "keywords": [
+    "whatsapp",
+    "bot",
+    "baileys",
+    "whatsapp-bot"
+  ],
+  "buildpacks": [
+    {
+      "url": "heroku/nodejs"
+    }
+  ],
+  "env": {
+    "PREFIX": {
+      "description": "Bot command prefix",
+      "value": "!"
+    },
+    "BOT_NAME": {
+      "description": "Bot name",
+      "value": "VenomBot"
+    },
+    "OWNER_NUMBER": {
+      "description": "Bot owner WhatsApp number (with country code)",
+      "value": ""
+    },
+    "TIMEZONE": {
+      "description": "Bot timezone",
+      "value": "Africa/Nairobi"
+    },
+    "AUTO_READ": {
+      "description": "Auto read messages",
+      "value": "true"
+    },
+    "AUTO_TYPING": {
+      "description": "Show typing indicator",
+      "value": "true"
+    },
+    "AUTO_REACT": {
+      "description": "Auto react to messages",
+      "value": "true"
+    }
+  },
+  "formation": {
+    "worker": {
+      "quantity": 1,
+      "size": "free"
+    }
+  }
+}
