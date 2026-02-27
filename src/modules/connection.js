@@ -15,6 +15,12 @@ import { deletedMessages } from '../utils/cache.js';
 
 let sock;
 let qrGenerated = false;
+let currentQR = null;
+
+/**
+ * Get current QR code data
+ */
+export const getCurrentQR = () => currentQR;
 
 /**
  * Initialize WhatsApp connection
@@ -42,9 +48,11 @@ export const connectToWhatsApp = async () => {
     const { connection, lastDisconnect, qr } = update;
 
     if (qr) {
+      currentQR = qr;
       if (!qrGenerated) {
         logger.info('📱 Scan QR code to login:');
         qrcode.generate(qr, { small: true });
+        logger.info('🌐 Or visit: http://localhost:'+process.env.PORT+'/qr to scan from browser');
         qrGenerated = true;
       }
     }
@@ -67,6 +75,7 @@ export const connectToWhatsApp = async () => {
       logger.success('✅ Connected to WhatsApp!');
       logger.info(`Bot: ${config.bot.name} v${config.bot.version}`);
       qrGenerated = false;
+      currentQR = null;
     }
   });
 
