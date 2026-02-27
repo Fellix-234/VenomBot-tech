@@ -212,3 +212,24 @@ export const getProfilePicture = async (jid) => {
     return null;
   }
 };
+
+/**
+ * Get socket instance
+ */
+export const getSocket = () => sock;
+
+/**
+ * Request pairing code for phone number
+ */
+export const requestPairingCode = async (phoneNumber) => {
+  try {
+    if (!sock) {
+      throw new Error('Socket not initialized');
+    }
+    const code = await sock.requestPairingCode(phoneNumber);
+    return code;
+  } catch (error) {
+    logger.error('Error requesting pairing code:', error.message);
+    throw error;
+  }
+};

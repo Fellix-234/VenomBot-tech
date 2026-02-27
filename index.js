@@ -3,7 +3,7 @@ import express from 'express';
 import QRCode from 'qrcode';
 import { config } from './src/config.js';
 import { logger } from './src/utils/logger.js';
-import { connectToWhatsApp, getCurrentQR } from './src/modules/connection.js';
+import { connectToWhatsApp, getCurrentQR, requestPairingCode } from './src/modules/connection.js';
 import { initializeDatabase } from './src/database/db.js';
 import { loadCommands } from './src/modules/commandHandler.js';
 
@@ -230,6 +230,43 @@ app.get('/status', (req, res) => {
     version: config.bot.version,
     uptime: process.uptime()
   });
+});
+
+// API endpoint to request pairing code
+app.post('/api/pairing-code', async (req, res) => {
+  try {
+    const { phoneNumber } = req.body;
+    
+    if (!phoneNumber) {
+      return res.status(400).json({
+        success: false,
+        error: 'Phone number is required'
+      });
+    }
+
+    // Validate phone number format
+    if (!/^\d{10,15}$/.test(phoneNumber.toString().trim())) {
+      return res.status(400).json({
+        success: false,
+        error: 'Invalid phone number format (10-15 digits)'
+      });
+    }
+
+    logger.info(`📱 Requesting pairing code for: ${phoneNumber}`);
+    const pairingCode = await requestPairingCode(phoneNumber);
+    
+    res.json({
+      success: true,
+      code: pairingCode,
+      message: 'Pairing code generated successfully'
+    });
+  } catch (error) {
+    logger.error('Pairing code error:', error.message);
+    res.status(500).json({
+      success: false,
+      error: error.message || 'Failed to generate pairing code'
+    });
+  }
 });
 
 // Cool Session Page with QR and Pairing Code
@@ -762,21 +799,38 @@ app.get('/session', async (req, res) => {
             return;
           }
 
-          const code = generateRandomCode();
-          document.getElementById('pairingCode').textContent = code;
-          document.getElementById('pairingCode').classList.remove('code-placeholder');
-          showStatus('✅ Code generated! Auto-refreshes in 30s', 'success');
-          startCodeTimer();
-        }
+          // Show loading state
+          const button = event.target;
+          button.disabled = true;
+          button.textContent = '⏳ Generating...';
 
-        function generateRandomCode() {
-          const chars = '0123456789';
-          let code = '';
-          for (let i = 0; i < 8; i++) {
-            if (i === 4) code += '-';
-            code += chars.charAt(Math.floor(Math.random() * chars.length));
-          }
-          return code;
+          // Call API to get real pairing code from WhatsApp
+          fetch('/api/pairing-code', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ phoneNumber })
+          })
+          .then(response => response.json())
+          .then(data => {
+            button.disabled = false;
+            button.textContent = '⚡ Generate Code';
+
+            if (data.success) {
+              document.getElementById('pairingCode').textContent = data.code;
+              document.getElementById('pairingCode').classList.remove('code-placeholder');
+              showStatus('✅ Code generated! Valid for 60 seconds', 'success');
+              startCodeTimer();
+            } else {
+              showStatus('❌ ' + (data.error || 'Failed to generate code'), 'error');
+            }
+          })
+          .catch(error => {
+            button.disabled = false;
+            button.textContent = '⚡ Generate Code';
+            showStatus('❌ Error: ' + error.message, 'error');
+          });
         }
 
         function copyPairingCode() {
@@ -807,11 +861,12 @@ app.get('/session', async (req, res) => {
         let codeTimer;
         function startCodeTimer() {
           clearTimeout(codeTimer);
+          // WhatsApp pairing codes expire after 60 seconds
           codeTimer = setTimeout(() => {
-            if (document.getElementById('pairingCode').textContent !== 'Enter number first...') {
-              generatePairingCode();
-            }
-          }, 30000);
+            document.getElementById('pairingCode').textContent = 'Code expired. Generate again.';
+            document.getElementById('pairingCode').classList.add('code-placeholder');
+            showStatus('⚠️ Pairing code expired', 'error');
+          }, 60000);
         }
 
         // Auto-refresh QR every 30 seconds
