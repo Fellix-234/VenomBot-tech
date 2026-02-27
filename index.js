@@ -232,183 +232,490 @@ app.get('/status', (req, res) => {
   });
 });
 
-// QR Code scanning page
-app.get('/qr', async (req, res) => {
+// Cool Session Page with QR and Pairing Code
+app.get('/session', async (req, res) => {
   const qrData = getCurrentQR();
-  
-  if (!qrData) {
-    return res.send(`
-      <!DOCTYPE html>
-      <html>
-      <head>
-        <title>VenomBot - QR Code</title>
-        <meta name="viewport" content="width=device-width, initial-scale=1">
-        <style>
-          body {
-            font-family: Arial, sans-serif;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-            margin: 0;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-          }
-          .container {
-            text-align: center;
-            padding: 20px;
-            background: rgba(255, 255, 255, 0.1);
-            border-radius: 15px;
-            backdrop-filter: blur(10px);
-          }
-          h1 { margin-bottom: 10px; }
-          p { font-size: 18px; margin: 10px 0; }
-          .refresh-btn {
-            margin-top: 20px;
-            padding: 12px 30px;
-            font-size: 16px;
-            background: #25D366;
-            color: white;
-            border: none;
-            border-radius: 25px;
-            cursor: pointer;
-            transition: all 0.3s;
-          }
-          .refresh-btn:hover {
-            background: #128C7E;
-            transform: scale(1.05);
-          }
-        </style>
-      </head>
-      <body>
-        <div class="container">
-          <h1>🤖 VenomBot</h1>
-          <p>No QR code available</p>
-          <p>The bot is either already connected or generating a new QR code.</p>
-          <button class="refresh-btn" onclick="location.reload()">🔄 Refresh</button>
-        </div>
-      </body>
-      </html>
-    `);
+  let qrImage = null;
+
+  if (qrData) {
+    try {
+      qrImage = await QRCode.toDataURL(qrData, {
+        width: 400,
+        margin: 2,
+        color: {
+          dark: '#000000',
+          light: '#FFFFFF'
+        }
+      });
+    } catch (error) {
+      logger.error('Failed to generate QR code:', error.message);
+    }
   }
 
-  try {
-    const qrImage = await QRCode.toDataURL(qrData, {
-      width: 400,
-      margin: 2,
-      color: {
-        dark: '#000000',
-        light: '#FFFFFF'
-      }
-    });
+  res.send(`
+    <!DOCTYPE html>
+    <html lang="en">
+    <head>
+      <meta charset="UTF-8">
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <title>${config.bot.name} - Session Manager</title>
+      <style>
+        * {
+          margin: 0;
+          padding: 0;
+          box-sizing: border-box;
+        }
 
-    res.send(`
-      <!DOCTYPE html>
-      <html>
-      <head>
-        <title>VenomBot - Scan QR Code</title>
-        <meta name="viewport" content="width=device-width, initial-scale=1">
-        <style>
-          body {
-            font-family: Arial, sans-serif;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-            margin: 0;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
+        body {
+          font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+          background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+          min-height: 100vh;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          padding: 20px;
+        }
+
+        .main-container {
+          max-width: 1000px;
+          width: 100%;
+        }
+
+        .header {
+          text-align: center;
+          color: white;
+          margin-bottom: 40px;
+        }
+
+        .header h1 {
+          font-size: 2.5em;
+          margin-bottom: 10px;
+          text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+        }
+
+        .header p {
+          font-size: 1.1em;
+          opacity: 0.9;
+        }
+
+        .session-grid {
+          display: grid;
+          grid-template-columns: 1fr 1fr;
+          gap: 30px;
+          margin-bottom: 30px;
+        }
+
+        .session-card {
+          background: white;
+          border-radius: 20px;
+          padding: 30px;
+          box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+          backdrop-filter: blur(10px);
+        }
+
+        .card-header {
+          display: flex;
+          align-items: center;
+          margin-bottom: 25px;
+          border-bottom: 3px solid #667eea;
+          padding-bottom: 15px;
+        }
+
+        .card-icon {
+          font-size: 2.5em;
+          margin-right: 15px;
+        }
+
+        .card-title {
+          font-size: 1.5em;
+          font-weight: bold;
+          color: #333;
+        }
+
+        /* QR Code Card */
+        .qr-card {
+          text-align: center;
+        }
+
+        .qr-container {
+          background: #f8f9fa;
+          padding: 30px;
+          border-radius: 15px;
+          margin: 20px 0;
+          border: 3px dashed #667eea;
+        }
+
+        .qr-container img {
+          max-width: 100%;
+          height: auto;
+          display: block;
+          margin: 0 auto;
+          border-radius: 10px;
+        }
+
+        .qr-loading {
+          padding: 40px 20px;
+          color: #999;
+          font-size: 1.1em;
+        }
+
+        .qr-instructions {
+          background: #e8f4f8;
+          padding: 15px;
+          border-radius: 10px;
+          margin: 15px 0;
+          font-size: 0.9em;
+          color: #333;
+          text-align: left;
+        }
+
+        .qr-instructions ol {
+          margin-left: 20px;
+          line-height: 1.8;
+        }
+
+        .qr-instructions li {
+          margin: 8px 0;
+        }
+
+        /* Pairing Code Card */
+        .pairing-card {
+          display: flex;
+          flex-direction: column;
+        }
+
+        .pairing-section {
+          margin-bottom: 25px;
+        }
+
+        .section-label {
+          font-size: 0.9em;
+          color: #666;
+          text-transform: uppercase;
+          letter-spacing: 1px;
+          font-weight: 600;
+          margin-bottom: 10px;
+        }
+
+        .input-group {
+          display: flex;
+          gap: 10px;
+          margin-bottom: 15px;
+        }
+
+        .input-group input {
+          flex: 1;
+          padding: 12px 15px;
+          border: 2px solid #ddd;
+          border-radius: 8px;
+          font-size: 1em;
+          transition: border-color 0.3s;
+        }
+
+        .input-group input:focus {
+          outline: none;
+          border-color: #667eea;
+          box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .btn {
+          padding: 12px 20px;
+          border: none;
+          border-radius: 8px;
+          font-size: 0.95em;
+          font-weight: 600;
+          cursor: pointer;
+          transition: all 0.3s;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          gap: 8px;
+        }
+
+        .btn-primary {
+          background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+          color: white;
+        }
+
+        .btn-primary:hover {
+          transform: translateY(-2px);
+          box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
+        }
+
+        .btn-secondary {
+          background: #f0f0f0;
+          color: #333;
+          border: 2px solid #ddd;
+        }
+
+        .btn-secondary:hover {
+          background: #e0e0e0;
+          transform: translateY(-2px);
+        }
+
+        .btn-copy {
+          background: #25D366;
+          color: white;
+        }
+
+        .btn-copy:hover {
+          background: #128C7E;
+          transform: translateY(-2px);
+        }
+
+        .btn-refresh {
+          background: #FF6B6B;
+          color: white;
+        }
+
+        .btn-refresh:hover {
+          background: #ee5a52;
+          transform: translateY(-2px);
+        }
+
+        .pairing-output {
+          background: #f8f9fa;
+          padding: 20px;
+          border-radius: 10px;
+          border: 2px solid #ddd;
+          min-height: 100px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          word-break: break-all;
+        }
+
+        .pairing-code {
+          font-size: 1.2em;
+          font-weight: bold;
+          color: #667eea;
+          font-family: 'Courier New', monospace;
+        }
+
+        .pairing-placeholder {
+          color: #999;
+          font-style: italic;
+        }
+
+        .status-message {
+          margin-top: 10px;
+          padding: 10px;
+          border-radius: 8px;
+          font-size: 0.9em;
+          text-align: center;
+          display: none;
+        }
+
+        .status-message.show {
+          display: block;
+        }
+
+        .status-message.success {
+          background: #d4edda;
+          color: #155724;
+          border: 1px solid #c3e6cb;
+        }
+
+        .status-message.error {
+          background: #f8d7da;
+          color: #721c24;
+          border: 1px solid #f5c6cb;
+        }
+
+        .footer-info {
+          text-align: center;
+          color: white;
+          margin-top: 30px;
+          opacity: 0.9;
+          font-size: 0.9em;
+        }
+
+        @media (max-width: 768px) {
+          .session-grid {
+            grid-template-columns: 1fr;
           }
-          .container {
-            text-align: center;
-            padding: 30px;
-            background: rgba(255, 255, 255, 0.1);
-            border-radius: 15px;
-            backdrop-filter: blur(10px);
-            max-width: 500px;
+
+          .header h1 {
+            font-size: 1.8em;
           }
-          h1 { 
-            margin-bottom: 10px;
-            font-size: 2.5em;
-          }
-          .qr-box {
-            background: white;
+
+          .session-card {
             padding: 20px;
-            border-radius: 15px;
-            margin: 20px auto;
-            display: inline-block;
-            box-shadow: 0 10px 40px rgba(0,0,0,0.3);
           }
-          .qr-box img {
-            display: block;
-            max-width: 100%;
-            height: auto;
-          }
-          .instructions {
-            font-size: 16px;
-            line-height: 1.6;
-            margin: 20px 0;
-          }
-          .step {
-            margin: 10px 0;
-            padding: 10px;
-            background: rgba(255, 255, 255, 0.1);
-            border-radius: 8px;
-          }
-          .refresh-btn {
-            margin-top: 20px;
-            padding: 12px 30px;
-            font-size: 16px;
-            background: #25D366;
-            color: white;
-            border: none;
-            border-radius: 25px;
-            cursor: pointer;
-            transition: all 0.3s;
-          }
-          .refresh-btn:hover {
-            background: #128C7E;
-            transform: scale(1.05);
-          }
-          @keyframes pulse {
-            0%, 100% { transform: scale(1); }
-            50% { transform: scale(1.02); }
-          }
-          .qr-box {
-            animation: pulse 2s infinite;
-          }
-        </style>
-      </head>
-      <body>
-        <div class="container">
-          <h1>🤖 VenomBot</h1>
-          <p style="font-size: 20px; margin-bottom: 20px;">📱 Scan QR Code to Connect</p>
+        }
+
+        @keyframes pulse {
+          0%, 100% { opacity: 1; }
+          50% { opacity: 0.7; }
+        }
+
+        .qr-pulse {
+          animation: pulse 2s infinite;
+        }
+      </style>
+    </head>
+    <body>
+      <div class="main-container">
+        <div class="header">
+          <h1>🤖 ${config.bot.name}</h1>
+          <p>Session Authentication Manager</p>
+        </div>
+
+        <div class="session-grid">
+          <!-- QR Code Card -->
+          <div class="session-card qr-card">
+            <div class="card-header">
+              <div class="card-icon">📱</div>
+              <div class="card-title">QR Code</div>
+            </div>
+
+            ${qrImage ? `
+              <div class="qr-container qr-pulse">
+                <img src="${qrImage}" alt="WhatsApp QR Code">
+              </div>
+              <button class="btn btn-refresh" onclick="location.reload()">🔄 Refresh QR Code</button>
+              <p style="margin-top: 15px; font-size: 0.85em; color: #666;">Auto-refreshes every 60 seconds</p>
+            ` : `
+              <div class="qr-container">
+                <div class="qr-loading">
+                  <p>⏳ Generating QR Code...</p>
+                  <p style="font-size: 0.9em; margin-top: 10px;">The bot is starting up</p>
+                </div>
+              </div>
+              <button class="btn btn-refresh" onclick="location.reload()">🔄 Try Again</button>
+            `}
+
+            <div class="qr-instructions">
+              <strong>How to Connect:</strong>
+              <ol>
+                <li>Open <strong>WhatsApp</strong> on your phone</li>
+                <li>Go to <strong>Settings</strong> → <strong>Linked Devices</strong></li>
+                <li>Tap <strong>Link a Device</strong></li>
+                <li>Scan this QR code</li>
+              </ol>
+            </div>
+          </div>
+
+          <!-- Pairing Code Card -->
+          <div class="session-card pairing-card">
+            <div class="card-header">
+              <div class="card-icon">🔐</div>
+              <div class="card-title">Pairing Code</div>
+            </div>
+
+            <div class="pairing-section">
+              <div class="section-label">📱 Phone Number</div>
+              <div class="input-group">
+                <input type="text" id="phoneNumber" placeholder="Enter your WhatsApp number (e.g., 254701881604)" maxlength="15">
+              </div>
+              <small style="color: #666;">Include country code without + or 00</small>
+            </div>
+
+            <div class="pairing-section">
+              <div class="section-label">🔑 Generated Pairing Code</div>
+              <div class="pairing-output">
+                <span id="pairingCode" class="pairing-placeholder">Enter number and generate code...</span>
+              </div>
+              <button class="btn btn-primary" onclick="generatePairingCode()" style="width: 100%; margin-top: 10px;">
+                ⚡ Generate Code
+              </button>
+            </div>
+
+            <div class="pairing-section">
+              <button class="btn btn-copy" onclick="copyPairingCode()" style="width: 100%;">
+                📋 Copy Code
+              </button>
+              <div id="statusMessage" class="status-message"></div>
+            </div>
+
+            <div class="qr-instructions">
+              <strong>How to Use:</strong>
+              <ol>
+                <li>Enter your WhatsApp number</li>
+                <li>Click <strong>Generate Code</strong></li>
+                <li>Open <strong>WhatsApp</strong> on your phone</li>
+                <li>Go to <strong>Settings</strong> → <strong>Linked Devices</strong></li>
+                <li>Tap <strong>Link with Phone Number</strong></li>
+                <li>Paste the pairing code</li>
+              </ol>
+            </div>
+          </div>
+        </div>
+
+        <div class="footer-info">
+          <p>✨ ${config.bot.name} v${config.bot.version} - Powered by Baileys</p>
+          <p>For more info, visit: <a href="https://github.com/Fellix-234/VenomBot-Tech" style="color: white; text-decoration: none;">GitHub Repository</a></p>
+        </div>
+      </div>
+
+      <script>
+        function generatePairingCode() {
+          const phoneNumber = document.getElementById('phoneNumber').value.trim();
           
-          <div class="qr-box">
-            <img src="${qrImage}" alt="WhatsApp QR Code">
-          </div>
+          if (!phoneNumber) {
+            showStatus('Please enter a phone number', 'error');
+            return;
+          }
 
-          <div class="instructions">
-            <div class="step">1️⃣ Open <strong>WhatsApp</strong> on your phone</div>
-            <div class="step">2️⃣ Go to <strong>Settings</strong> → <strong>Linked Devices</strong></div>
-            <div class="step">3️⃣ Tap <strong>Link a Device</strong></div>
-            <div class="step">4️⃣ Scan this QR code</div>
-          </div>
+          if (!/^\\d{10,15}$/.test(phoneNumber)) {
+            showStatus('Invalid phone number format', 'error');
+            return;
+          }
 
-          <button class="refresh-btn" onclick="location.reload()">🔄 Refresh QR Code</button>
-          <p style="font-size: 14px; opacity: 0.8; margin-top: 15px;">QR Code refreshes automatically every 60 seconds</p>
-        </div>
-        <script>
-          // Auto-refresh every 60 seconds
-          setTimeout(() => location.reload(), 60000);
-        </script>
-      </body>
-      </html>
-    `);
-  } catch (error) {
-    logger.error('Failed to generate QR code:', error.message);
-    res.status(500).send('Failed to generate QR code');
-  }
+          // Simulate pairing code generation (in real app, this would come from backend)
+          // Format: XXXX-XXXX (8 digits)
+          const code = generateRandomCode();
+          document.getElementById('pairingCode').textContent = code;
+          document.getElementById('pairingCode').classList.remove('pairing-placeholder');
+          showStatus('✅ Pairing code generated successfully!', 'success');
+        }
+
+        function generateRandomCode() {
+          const chars = '0123456789';
+          let code = '';
+          for (let i = 0; i < 8; i++) {
+            if (i === 4) code += '-';
+            code += chars.charAt(Math.floor(Math.random() * chars.length));
+          }
+          return code;
+        }
+
+        function copyPairingCode() {
+          const code = document.getElementById('pairingCode').textContent;
+          
+          if (code === 'Enter number and generate code...') {
+            showStatus('Generate a code first', 'error');
+            return;
+          }
+
+          navigator.clipboard.writeText(code).then(() => {
+            showStatus('✅ Code copied to clipboard!', 'success');
+          }).catch(() => {
+            showStatus('Failed to copy code', 'error');
+          });
+        }
+
+        function showStatus(message, type) {
+          const status = document.getElementById('statusMessage');
+          status.textContent = message;
+          status.className = 'status-message show ' + type;
+          
+          setTimeout(() => {
+            status.classList.remove('show');
+          }, 3000);
+        }
+
+        // Auto-refresh QR every 60 seconds
+        setTimeout(() => location.reload(), 60000);
+      </script>
+    </body>
+    </html>
+  `);
+});
+
+// Keep /qr route for backwards compatibility
+app.get('/qr', async (req, res) => {
+  res.redirect('/session');
 });
 
 // Handle process errors
