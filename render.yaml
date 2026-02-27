@@ -1,0 +1,23 @@
+services:
+  - type: web
+    name: venombot-tech
+    env: node
+    buildCommand: yarn install
+    startCommand: node start.js
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PREFIX
+        value: "!"
+      - key: BOT_NAME
+        value: VenomBot
+      - key: AUTO_READ
+        value: true
+      - key: AUTO_TYPING
+        value: true
+      - key: AUTO_REACT
+        value: false
+      - key: USE_JSON_DB
+        value: true
+      - key: TIMEZONE
+        value: Africa/Nairobi

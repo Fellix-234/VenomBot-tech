@@ -2,7 +2,7 @@
   "name": "venombot-tech",
   "version": "2.0.0",
   "description": "Professional WhatsApp Bot built with Baileys",
-  "main": "index.js",
+  "main": "start.js",
   "type": "module",
   "scripts": {
     "start": "node start.js",
