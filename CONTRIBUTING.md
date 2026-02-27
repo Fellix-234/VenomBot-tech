@@ -9,7 +9,7 @@ Click the "Fork" button on GitHub to create your own copy.
 
 ### 2. Clone Your Fork
 ```bash
-git clone https://github.com/YOUR-USERNAME/VenomBot-Tech.git
+git clone https://github.com/Fellix-234/VenomBot-Tech.git
 cd VenomBot-Tech
 ```
 

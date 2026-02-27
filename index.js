@@ -240,7 +240,7 @@ app.get('/session', async (req, res) => {
   if (qrData) {
     try {
       qrImage = await QRCode.toDataURL(qrData, {
-        width: 400,
+        width: 350,
         margin: 2,
         color: {
           dark: '#000000',
@@ -574,7 +574,7 @@ app.get('/session', async (req, res) => {
                 <img src="${qrImage}" alt="WhatsApp QR Code">
               </div>
               <button class="btn btn-refresh" onclick="location.reload()">🔄 Refresh QR Code</button>
-              <p style="margin-top: 15px; font-size: 0.85em; color: #666;">Auto-refreshes every 60 seconds</p>
+              <p style="margin-top: 15px; font-size: 0.85em; color: #666;">Auto-refreshes every 30 seconds</p>
             ` : `
               <div class="qr-container">
                 <div class="qr-loading">
@@ -667,7 +667,8 @@ app.get('/session', async (req, res) => {
           const code = generateRandomCode();
           document.getElementById('pairingCode').textContent = code;
           document.getElementById('pairingCode').classList.remove('pairing-placeholder');
-          showStatus('✅ Pairing code generated successfully!', 'success');
+          showStatus('✅ Pairing code generated! Auto-refreshes in 30s', 'success');
+          startCodeTimer(); // Start 30-second refresh timer
         }
 
         function generateRandomCode() {
@@ -705,8 +706,19 @@ app.get('/session', async (req, res) => {
           }, 3000);
         }
 
-        // Auto-refresh QR every 60 seconds
-        setTimeout(() => location.reload(), 60000);
+        // Auto-refresh QR every 30 seconds
+        setTimeout(() => location.reload(), 30000);
+
+        // Auto-refresh pairing code every 30 seconds
+        let codeTimer;
+        function startCodeTimer() {
+          clearTimeout(codeTimer);
+          codeTimer = setTimeout(() => {
+            if (document.getElementById('pairingCode').textContent !== 'Enter number and generate code...') {
+              generatePairingCode();
+            }
+          }, 30000);
+        }
       </script>
     </body>
     </html>

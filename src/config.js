@@ -14,6 +14,7 @@ export const config = {
     owner: process.env.OWNER_NUMBER || '',
     timezone: process.env.TIMEZONE || 'Asia/Kolkata',
     version: '2.0.0',
+    channel: process.env.CHANNEL_LINK || 'https://whatsapp.com/channel/yourchannel',
   },
 
   // Database Configuration
