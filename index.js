@@ -817,7 +817,7 @@ app.get('/session', async (req, res) => {
           
           <!-- Social Buttons -->
           <div class="social-buttons">
-            <a href="https://wa.me/2547391914" class="social-btn social-btn-whatsapp" title="Contact Developer on WhatsApp" target="_blank">
+            <a href="https://wa.me/254725391914" class="social-btn social-btn-whatsapp" title="Contact Developer on WhatsApp" target="_blank">
               <i class="fab fa-whatsapp"></i>
             </a>
             <a href="https://discord.gg/venombot" class="social-btn social-btn-discord" title="Join Discord Community" target="_blank">
