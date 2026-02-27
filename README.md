@@ -4,20 +4,33 @@
 
 <img src="https://readme-typing-svg.herokuapp.com?font=Fira+Code&weight=600&size=28&pause=1000&color=4ECDC4&center=true&vCenter=true&width=900&lines=VenomBot+Tech+%7C+Professional+WhatsApp+Bot;Modern+Baileys+Bot+with+60%2B+Commands;QR+%2B+Pairing+Auth+%7C+Cloud+Ready+%7C+Open+Source" alt="Typing SVG" />
 
-<p>
-  <a href="https://github.com/Fellix-234/VenomBot-Tech/stargazers"><img src="https://img.shields.io/github/stars/Fellix-234/VenomBot-Tech?style=for-the-badge&logo=github&color=facc15" alt="Stars"/></a>
-  <a href="https://github.com/Fellix-234/VenomBot-Tech/network/members"><img src="https://img.shields.io/github/forks/Fellix-234/VenomBot-Tech?style=for-the-badge&logo=github&color=f97316" alt="Forks"/></a>
-  <a href="https://github.com/Fellix-234/VenomBot-Tech/blob/main/LICENSE"><img src="https://img.shields.io/github/license/Fellix-234/VenomBot-Tech?style=for-the-badge&color=ef4444" alt="License"/></a>
-  <img src="https://img.shields.io/badge/Node.js-18%2B-22c55e?style=for-the-badge&logo=node.js" alt="Node"/>
-  <img src="https://img.shields.io/badge/Status-Active-10b981?style=for-the-badge" alt="Status"/>
-</p>
-
-<p>
-  <a href="https://venombot-tech.onrender.com/session"><img src="https://img.shields.io/badge/Get%20Session-Live%20Auth%20Page-2563eb?style=for-the-badge&logo=whatsapp" alt="Session"/></a>
-  <a href="https://render.com/deploy?repo=https://github.com/Fellix-234/VenomBot-Tech"><img src="https://img.shields.io/badge/Deploy-Render-46E3B7?style=for-the-badge&logo=render&logoColor=000" alt="Render"/></a>
-  <a href="https://railway.app/new?template=https://github.com/Fellix-234/VenomBot-Tech"><img src="https://img.shields.io/badge/Deploy-Railway-0B0D0E?style=for-the-badge&logo=railway" alt="Railway"/></a>
-  <a href="https://replit.com/github/Fellix-234/VenomBot-Tech"><img src="https://img.shields.io/badge/Deploy-Replit-F26207?style=for-the-badge&logo=replit&logoColor=fff" alt="Replit"/></a>
-</p>
+<table>
+  <tr>
+    <td align="center">
+      <b>Repository</b><br/><br/>
+      <a href="https://github.com/Fellix-234/VenomBot-Tech/stargazers"><img src="https://img.shields.io/github/stars/Fellix-234/VenomBot-Tech?style=for-the-badge&logo=github&color=facc15" alt="Stars"/></a>
+      <a href="https://github.com/Fellix-234/VenomBot-Tech/network/members"><img src="https://img.shields.io/github/forks/Fellix-234/VenomBot-Tech?style=for-the-badge&logo=github&color=f97316" alt="Forks"/></a>
+      <a href="https://github.com/Fellix-234/VenomBot-Tech/blob/main/LICENSE"><img src="https://img.shields.io/github/license/Fellix-234/VenomBot-Tech?style=for-the-badge&color=ef4444" alt="License"/></a>
+      <img src="https://img.shields.io/badge/Node.js-18%2B-22c55e?style=for-the-badge&logo=node.js" alt="Node"/>
+    </td>
+  </tr>
+  <tr>
+    <td align="center">
+      <b>Live Access</b><br/><br/>
+      <a href="https://venombot-tech.onrender.com/session"><img src="https://img.shields.io/badge/Get%20Session-Live%20Auth%20Page-2563eb?style=for-the-badge&logo=whatsapp" alt="Session"/></a>
+      <a href="https://venombot-tech.onrender.com/"><img src="https://img.shields.io/badge/Status-Live%20Dashboard-10b981?style=for-the-badge&logo=google-chrome&logoColor=white" alt="Status"/></a>
+      <a href="https://venombot-tech.onrender.com/health"><img src="https://img.shields.io/badge/Health-API%20OK-0ea5e9?style=for-the-badge&logo=vercel&logoColor=white" alt="Health"/></a>
+    </td>
+  </tr>
+  <tr>
+    <td align="center">
+      <b>One-Click Deploy</b><br/><br/>
+      <a href="https://render.com/deploy?repo=https://github.com/Fellix-234/VenomBot-Tech"><img src="https://img.shields.io/badge/Deploy-Render-46E3B7?style=for-the-badge&logo=render&logoColor=000" alt="Render"/></a>
+      <a href="https://railway.app/new?template=https://github.com/Fellix-234/VenomBot-Tech"><img src="https://img.shields.io/badge/Deploy-Railway-0B0D0E?style=for-the-badge&logo=railway" alt="Railway"/></a>
+      <a href="https://replit.com/github/Fellix-234/VenomBot-Tech"><img src="https://img.shields.io/badge/Deploy-Replit-F26207?style=for-the-badge&logo=replit&logoColor=fff" alt="Replit"/></a>
+    </td>
+  </tr>
+</table>
 
 </div>
 
