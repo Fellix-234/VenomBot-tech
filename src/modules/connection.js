@@ -262,9 +262,14 @@ export const requestPairingCode = async (phoneNumber) => {
 
     logger.info(`📱 Requesting pairing code for: ${cleaned}`);
     
-    // Use the existing main socket for pairing code
+    // Check if socket exists
     if (!sock) {
       throw new Error('WhatsApp connection not initialized. Please wait a moment and try again.');
+    }
+    
+    // Check if already connected (pairing codes only work before authentication)
+    if (sock.user) {
+      throw new Error('Bot is already authenticated. Delete auth_info_baileys folder to start fresh.');
     }
     
     let code;
@@ -277,7 +282,7 @@ export const requestPairingCode = async (phoneNumber) => {
       logger.info('Using requestPhoneNumberCode method');
       code = await sock.requestPhoneNumberCode(cleaned);
     } else {
-      throw new Error('Pairing code feature not supported in this Baileys version. Use QR code instead.');
+      throw new Error('Pairing code not supported. Your Baileys version may be outdated. Use QR code instead.');
     }
     
     if (!code) {
@@ -288,6 +293,14 @@ export const requestPairingCode = async (phoneNumber) => {
     return code;
   } catch (error) {
     logger.error('Pairing code error:', error.message);
-    throw new Error(`Pairing failed: ${error.message}`);
+    
+    // Provide helpful error messages
+    if (error.message.includes('already authenticated')) {
+      throw new Error('Bot already connected. Delete session to generate new pairing code.');
+    } else if (error.message.includes('not supported')) {
+      throw new Error('Pairing codes not available. Please use the QR code method instead.');
+    }
+    
+    throw error;
   }
 };
