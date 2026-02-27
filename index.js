@@ -359,9 +359,12 @@ app.get('/session', async (req, res) => {
 
         .grid {
           display: grid;
-          grid-template-columns: 1fr 1fr;
+          grid-template-columns: 1fr;
           gap: 40px;
           margin-bottom: 40px;
+          max-width: 600px;
+          margin-left: auto;
+          margin-right: auto;
         }
 
         .card {
@@ -703,81 +706,81 @@ app.get('/session', async (req, res) => {
         </div>
 
         <div class="grid">
-          <!-- QR Code Card -->
+          <!-- Unified Authentication Form -->
           <div class="card">
             <div class="card-header">
-              <div class="card-icon">📱</div>
-              <div class="card-title">QR Code</div>
+              <div class="card-icon">🔑</div>
+              <div class="card-title">Session Authentication</div>
             </div>
 
-            ${qrImage ? `
-              <div class="qr-display qr-pulse">
-                <img src="${qrImage}" alt="WhatsApp QR Code">
-              </div>
-              <button class="btn btn-refresh" onclick="location.reload()">🔄 Refresh QR Code</button>
-              <p style="color: #64748b; margin-top: 15px; font-size: 0.9em;">Auto-refreshes every 30 seconds</p>
-            ` : `
-              <div class="qr-display">
-                <div class="qr-loading">
-                  <p style="margin-bottom: 10px;">⏳ Generating QR Code...</p>
-                  <p style="font-size: 0.9em; color: #999;">The bot is initializing</p>
+            <form id="authForm" class="pairing-form" onsubmit="return false;">
+              <!-- QR Code Section -->
+              <div class="form-group">
+                <label class="form-label">📱 Method 1: QR Code</label>
+                ${qrImage ? `
+                  <div class="qr-display qr-pulse">
+                    <img src="${qrImage}" alt="WhatsApp QR Code" style="max-width: 100%; height: auto;">
+                  </div>
+                  <button type="button" class="btn btn-secondary" onclick="location.reload()" style="width: 100%; margin-top: 12px;">🔄 Refresh QR Code</button>
+                  <p style="color: #64748b; margin-top: 10px; font-size: 0.85em; text-align: center;">Auto-refreshes every 30 seconds</p>
+                ` : `
+                  <div class="qr-display">
+                    <div class="qr-loading">
+                      <p style="margin-bottom: 10px;">⏳ Generating QR Code...</p>
+                      <p style="font-size: 0.9em; color: #999;">The bot is initializing</p>
+                    </div>
+                  </div>
+                  <button type="button" class="btn btn-secondary" onclick="location.reload()" style="width: 100%; margin-top: 12px;">🔄 Try Again</button>
+                `}
+
+                <div class="instructions" style="margin-top: 15px;">
+                  <strong style="color: #45b7d1;">📖 QR Connection Steps:</strong>
+                  <ol style="margin-top: 8px;">
+                    <li>Open <strong>WhatsApp</strong> on your phone</li>
+                    <li>Go to <strong>Settings</strong> → <strong>Linked Devices</strong></li>
+                    <li>Tap <strong>Link a Device</strong></li>
+                    <li>Scan this QR code</li>
+                  </ol>
                 </div>
               </div>
-              <button class="btn btn-refresh" onclick="location.reload()">🔄 Try Again</button>
-            `}
 
-            <div class="instructions">
-              <strong>📖 Connection Steps:</strong>
-              <ol>
-                <li>Open <strong>WhatsApp</strong> on your phone</li>
-                <li>Go to <strong>Settings</strong> → <strong>Linked Devices</strong></li>
-                <li>Tap <strong>Link a Device</strong></li>
-                <li>Scan this QR code</li>
-              </ol>
-            </div>
-          </div>
+              <!-- Divider -->
+              <div style="margin: 25px 0; border-top: 1px solid #2d3561; padding-top: 20px;">
+                <p style="text-align: center; color: #64748b; font-size: 0.85em; font-weight: 600;">— OR —</p>
+              </div>
 
-          <!-- Pairing Code Card -->
-          <div class="card">
-            <div class="card-header">
-              <div class="card-icon">🔐</div>
-              <div class="card-title">Pairing Code</div>
-            </div>
-
-            <form id="pairingForm" class="pairing-form" onsubmit="return false;">
+              <!-- Pairing Code Section -->
               <div class="form-group">
-                <label class="form-label">📱 Phone Number</label>
+                <label class="form-label">🔐 Method 2: Pairing Code</label>
                 <input type="tel" id="phoneNumber" class="form-input" placeholder="e.g., 254701881604" maxlength="15">
-                <small style="color: #64748b;">Include country code (no + or 00)</small>
+                <small style="color: #64748b;">Enter your phone number (country code + digits only)</small>
               </div>
 
               <div class="form-group">
-                <label class="form-label">🔑 Generated Code</label>
+                <label class="form-label">Generated Pairing Code</label>
                 <div class="code-display">
-                  <span id="pairingCode" class="code-placeholder">Enter number first...</span>
+                  <span id="pairingCode" class="code-placeholder">Enter number above...</span>
                 </div>
               </div>
 
-              <button type="button" class="btn btn-primary" onclick="generatePairingCode()">⚡ Generate Code</button>
-
-              <button type="button" class="btn btn-copy" onclick="copyPairingCode()" style="width: 100%;">📋 Copy Code</button>
+              <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 15px;">
+                <button type="button" class="btn btn-primary" onclick="generatePairingCode()">⚡ Generate</button>
+                <button type="button" class="btn btn-copy" onclick="copyPairingCode()">📋 Copy Code</button>
+              </div>
 
               <div id="statusMessage" class="status"></div>
 
-              <div class="instructions">
-                <strong>📖 How to Use Pairing Code:</strong>
-                <ol>
-                  <li>Enter your WhatsApp phone number (with country code)</li>
-                  <li>Click <strong>Generate Code</strong> and wait for the code</li>
+              <div class="instructions" style="margin-top: 15px;">
+                <strong style="color: #45b7d1;">📖 Pairing Connection Steps:</strong>
+                <ol style="margin-top: 8px;">
+                  <li>Enter your WhatsApp phone number above</li>
+                  <li>Click <strong>Generate</strong> and wait for the code</li>
                   <li>Open <strong>WhatsApp</strong> on your phone</li>
                   <li>Go to <strong>Settings</strong> → <strong>Linked Devices</strong></li>
                   <li>Tap <strong>Link with Phone Number</strong></li>
-                  <li>When asked, enter the generated code</li>
+                  <li>Enter the generated code</li>
                   <li>Code is valid for 60 seconds only</li>
                 </ol>
-                <p style="margin-top: 12px; color: #34d399; font-size: 0.85em;">
-                  💡 Tip: If pairing code doesn't work, use the <strong>QR Code</strong> method instead (left side)
-                </p>
               </div>
             </form>
           </div>
