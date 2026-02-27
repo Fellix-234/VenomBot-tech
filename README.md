@@ -40,6 +40,12 @@ Choose your platform and deploy in just 1 click:
   </a>
 </p>
 
+<p align="center">
+  <a href="https://venombot-tech.onrender.com/qr">
+    <img src="https://img.shields.io/badge/Get%20Session-QR%20Code-007BFF?style=for-the-badge&logo=qrcode" alt="Get Session">
+  </a>
+</p></p>
+
 📖 **Read [DEPLOYMENT.md](DEPLOYMENT.md)** for detailed guides on all platforms (Render, Railway, Heroku, Replit, VPS, Local Server)
 
 ## ✨ Features
