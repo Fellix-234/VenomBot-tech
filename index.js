@@ -268,7 +268,7 @@ app.get('/session', async (req, res) => {
 
         body {
           font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', sans-serif;
-          background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #334155 100%);
+          background: linear-gradient(135deg, #0f0f23 0%, #1a1a3a 50%, #16213e 100%);
           min-height: 100vh;
           display: flex;
           align-items: center;
@@ -306,7 +306,7 @@ app.get('/session', async (req, res) => {
         .header h1 {
           font-size: 2.8em;
           font-weight: 700;
-          background: linear-gradient(135deg, #60a5fa 0%, #34d399 100%);
+          background: linear-gradient(135deg, #ff6b6b 0%, #4ecdc4 50%, #45b7d1 100%);
           -webkit-background-clip: text;
           -webkit-text-fill-color: transparent;
           background-clip: text;
@@ -328,8 +328,8 @@ app.get('/session', async (req, res) => {
         }
 
         .card {
-          background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
-          border: 1px solid #475569;
+          background: linear-gradient(135deg, #1a1a3a 0%, #16213e 100%);
+          border: 1px solid #2d3561;
           border-radius: 20px;
           padding: 40px;
           backdrop-filter: blur(10px);
@@ -349,8 +349,8 @@ app.get('/session', async (req, res) => {
         }
 
         .card:hover {
-          border-color: #64748b;
-          box-shadow: 0 8px 32px rgba(96, 165, 250, 0.1);
+          border-color: #45b7d1;
+          box-shadow: 0 8px 32px rgba(69, 183, 209, 0.15);
         }
 
         .card-header {
@@ -367,7 +367,7 @@ app.get('/session', async (req, res) => {
           display: flex;
           align-items: center;
           justify-content: center;
-          background: linear-gradient(135deg, #60a5fa 0%, #34d399 100%);
+          background: linear-gradient(135deg, #ff6b6b 0%, #4ecdc4 100%);
           border-radius: 15px;
         }
 
@@ -403,13 +403,14 @@ app.get('/session', async (req, res) => {
         }
 
         .instructions {
-          background: linear-gradient(135deg, #0ea5e9 0%, #06b6d4 100%);
+          background: linear-gradient(135deg, #2d5a7d 0%, #1f4a5c 100%);
           padding: 20px;
           border-radius: 12px;
           margin: 20px 0;
           color: white;
           font-size: 0.95em;
           line-height: 1.8;
+          border-left: 4px solid #45b7d1;
         }
 
         .instructions ol {
@@ -443,28 +444,28 @@ app.get('/session', async (req, res) => {
 
         .form-input {
           padding: 14px 18px;
-          background: #0f172a;
-          border: 2px solid #334155;
+          background: #0f0f23;
+          border: 2px solid #2d3561;
           border-radius: 10px;
-          color: #f1f5f9;
+          color: #e0e7ff;
           font-size: 1em;
           transition: all 0.3s;
         }
 
         .form-input:focus {
           outline: none;
-          border-color: #60a5fa;
-          box-shadow: 0 0 0 3px rgba(96, 165, 250, 0.1);
-          background: #1e293b;
+          border-color: #45b7d1;
+          box-shadow: 0 0 0 3px rgba(69, 183, 209, 0.2);
+          background: #1a1a3a;
         }
 
         .form-input::placeholder {
-          color: #64748b;
+          color: #6b7280;
         }
 
         .code-display {
-          background: #0f172a;
-          border: 2px dashed #475569;
+          background: linear-gradient(135deg, #0f0f23 0%, #1a1a3a 100%);
+          border: 2px solid #2d3561;
           border-radius: 12px;
           padding: 28px;
           text-align: center;
@@ -476,11 +477,11 @@ app.get('/session', async (req, res) => {
         }
 
         .code-display:hover {
-          border-color: #60a5fa;
-          background: #1e293b;
+          border-color: #45b7d1;
+          background: linear-gradient(135deg, #1a1a3a 0%, #2d3561 100%);
         }
 
-        .pairing-code-text {
+        #pairingCode {
           font-size: 2em;
           font-weight: bold;
           font-family: 'Monaco', 'Courier New', monospace;
@@ -491,7 +492,7 @@ app.get('/session', async (req, res) => {
 
         .code-placeholder {
           font-size: 0.95em;
-          color: #64748b;
+          color: #6b7280;
           font-style: italic;
         }
 
@@ -522,14 +523,14 @@ app.get('/session', async (req, res) => {
         }
 
         .btn-primary {
-          background: linear-gradient(135deg, #60a5fa 0%, #34d399 100%);
-          color: #0f172a;
+          background: linear-gradient(135deg, #ff6b6b 0%, #4ecdc4 100%);
+          color: white;
           font-weight: 700;
         }
 
         .btn-primary:hover {
           transform: translateY(-2px);
-          box-shadow: 0 12px 24px rgba(96, 165, 250, 0.3);
+          box-shadow: 0 12px 24px rgba(255, 107, 107, 0.3);
         }
 
         .btn-primary:active {
@@ -537,36 +538,36 @@ app.get('/session', async (req, res) => {
         }
 
         .btn-secondary {
-          background: #334155;
-          color: #f1f5f9;
-          border: 1px solid #475569;
+          background: #2d3561;
+          color: #e0e7ff;
+          border: 1px solid #45b7d1;
         }
 
         .btn-secondary:hover {
-          background: #475569;
-          border-color: #64748b;
+          background: #3d4571;
+          border-color: #4ecdc4;
         }
 
         .btn-copy {
-          background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+          background: linear-gradient(135deg, #4ecdc4 0%, #45b7d1 100%);
           color: white;
           font-weight: 700;
         }
 
         .btn-copy:hover {
           transform: translateY(-2px);
-          box-shadow: 0 12px 24px rgba(16, 185, 129, 0.3);
+          box-shadow: 0 12px 24px rgba(78, 205, 196, 0.3);
         }
 
         .btn-refresh {
-          background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+          background: linear-gradient(135deg, #ff6b6b 0%, #ff8b94 100%);
           color: white;
           font-weight: 700;
         }
 
         .btn-refresh:hover {
           transform: translateY(-2px);
-          box-shadow: 0 12px 24px rgba(245, 158, 11, 0.3);
+          box-shadow: 0 12px 24px rgba(255, 107, 107, 0.3);
         }
 
         .status {
@@ -577,6 +578,7 @@ app.get('/session', async (req, res) => {
           display: none;
           margin-top: 12px;
           animation: slideIn 0.3s ease-out;
+          font-weight: 600;
         }
 
         @keyframes slideIn {
@@ -595,32 +597,35 @@ app.get('/session', async (req, res) => {
         }
 
         .status.success {
-          background: #10b981;
+          background: linear-gradient(135deg, #4ecdc4 0%, #45b7d1 100%);
           color: white;
-          border: 1px solid #059669;
+          border: 1px solid #2d9e9e;
         }
 
         .status.error {
-          background: #ef4444;
+          background: linear-gradient(135deg, #ff6b6b 0%, #ff5252 100%);
           color: white;
-          border: 1px solid #dc2626;
+          border: 1px solid #cc3333;
         }
 
         .footer {
           text-align: center;
-          color: #94a3b8;
+          color: #9ca3af;
           font-size: 0.9em;
           margin-top: 50px;
         }
 
         .footer a {
-          color: #60a5fa;
+          color: #4ecdc4;
           text-decoration: none;
-          transition: color 0.3s;
+          font-weight: 600;
+          transition: all 0.3s;
+          border-bottom: 2px solid transparent;
         }
 
         .footer a:hover {
-          color: #34d399;
+          color: #45b7d1;
+          border-bottom-color: #45b7d1;
         }
 
         @media (max-width: 900px) {
