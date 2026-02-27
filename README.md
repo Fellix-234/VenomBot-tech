@@ -30,6 +30,15 @@
       <a href="https://replit.com/github/Fellix-234/VenomBot-Tech"><img src="https://img.shields.io/badge/Deploy-Replit-F26207?style=for-the-badge&logo=replit&logoColor=fff" alt="Replit"/></a>
     </td>
   </tr>
+  <tr>
+    <td align="center">
+      <b>Quick Actions</b><br/><br/>
+      <a href="https://wa.me/254725391914"><img src="https://img.shields.io/badge/WhatsApp-Dev%201-25d366?style=for-the-badge&logo=whatsapp&logoColor=white" alt="WhatsApp Dev 1"/></a>
+      <a href="https://wa.me/254701881604"><img src="https://img.shields.io/badge/WhatsApp-Dev%202-25d366?style=for-the-badge&logo=whatsapp&logoColor=white" alt="WhatsApp Dev 2"/></a>
+      <a href="https://github.com/Fellix-234/VenomBot-Tech/issues"><img src="https://img.shields.io/badge/Issues-Report%20Bug-ff6b6b?style=for-the-badge&logo=github&logoColor=white" alt="Issues"/></a>
+      <a href="https://github.com/Fellix-234/VenomBot-Tech/blob/main/CONTRIBUTING.md"><img src="https://img.shields.io/badge/Contribute-Help%20Out-8b5cf6?style=for-the-badge&logo=github&logoColor=white" alt="Contributing"/></a>
+    </td>
+  </tr>
 </table>
 
 </div>
