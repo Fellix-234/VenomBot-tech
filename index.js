@@ -30,13 +30,190 @@ const displayBanner = () => {
 
 // HTTP Server Routes
 app.get('/', (req, res) => {
-  res.json({
-    status: 'online',
-    bot: config.bot.name,
-    version: config.bot.version,
-    uptime: process.uptime(),
-    timestamp: new Date().toISOString()
-  });
+  const uptime = process.uptime();
+  const hours = Math.floor(uptime / 3600);
+  const minutes = Math.floor((uptime % 3600) / 60);
+  const seconds = Math.floor(uptime % 60);
+  const uptimeFormatted = `${hours}h ${minutes}m ${seconds}s`;
+  
+  res.send(`
+    <!DOCTYPE html>
+    <html lang="en">
+    <head>
+      <meta charset="UTF-8">
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <title>${config.bot.name} - Status</title>
+      <style>
+        * {
+          margin: 0;
+          padding: 0;
+          box-sizing: border-box;
+        }
+        
+        body {
+          font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+          background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+          min-height: 100vh;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          padding: 20px;
+        }
+        
+        .container {
+          max-width: 600px;
+          width: 100%;
+        }
+        
+        .card {
+          background: white;
+          border-radius: 20px;
+          box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+          padding: 40px;
+          text-align: center;
+        }
+        
+        .logo {
+          font-size: 48px;
+          margin-bottom: 20px;
+        }
+        
+        .bot-name {
+          font-size: 32px;
+          font-weight: bold;
+          color: #333;
+          margin-bottom: 10px;
+        }
+        
+        .status-badge {
+          display: inline-block;
+          background: #10b981;
+          color: white;
+          padding: 8px 16px;
+          border-radius: 50px;
+          font-size: 14px;
+          font-weight: 600;
+          margin-bottom: 30px;
+          animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+          0%, 100% { opacity: 1; }
+          50% { opacity: 0.7; }
+        }
+        
+        .info-grid {
+          display: grid;
+          grid-template-columns: 1fr 1fr;
+          gap: 20px;
+          margin-bottom: 30px;
+        }
+        
+        .info-item {
+          background: #f8f9fa;
+          padding: 20px;
+          border-radius: 12px;
+          border-left: 4px solid #667eea;
+        }
+        
+        .info-label {
+          font-size: 12px;
+          color: #666;
+          text-transform: uppercase;
+          letter-spacing: 0.5px;
+          margin-bottom: 8px;
+          font-weight: 600;
+        }
+        
+        .info-value {
+          font-size: 20px;
+          font-weight: bold;
+          color: #333;
+        }
+        
+        .timestamp {
+          font-size: 12px;
+          color: #999;
+          margin-top: 20px;
+          padding-top: 20px;
+          border-top: 1px solid #eee;
+        }
+        
+        .links {
+          display: flex;
+          gap: 10px;
+          justify-content: center;
+          margin-top: 20px;
+          flex-wrap: wrap;
+        }
+        
+        .link-btn {
+          padding: 8px 16px;
+          border-radius: 8px;
+          text-decoration: none;
+          font-size: 12px;
+          font-weight: 600;
+          transition: all 0.3s;
+        }
+        
+        .link-btn-primary {
+          background: #667eea;
+          color: white;
+        }
+        
+        .link-btn-primary:hover {
+          background: #764ba2;
+          transform: translateY(-2px);
+        }
+        
+        .link-btn-secondary {
+          background: #e0e0e0;
+          color: #333;
+        }
+        
+        .link-btn-secondary:hover {
+          background: #d0d0d0;
+        }
+      </style>
+    </head>
+    <body>
+      <div class="container">
+        <div class="card">
+          <div class="logo">🤖</div>
+          <h1 class="bot-name">${config.bot.name}</h1>
+          <div class="status-badge">● Online</div>
+          
+          <div class="info-grid">
+            <div class="info-item">
+              <div class="info-label">Version</div>
+              <div class="info-value">${config.bot.version}</div>
+            </div>
+            <div class="info-item">
+              <div class="info-label">Prefix</div>
+              <div class="info-value">${config.bot.prefix}</div>
+            </div>
+            <div class="info-item">
+              <div class="info-label">Uptime</div>
+              <div class="info-value">${uptimeFormatted}</div>
+            </div>
+            <div class="info-item">
+              <div class="info-label">Status</div>
+              <div class="info-value" style="color: #10b981;">Active</div>
+            </div>
+          </div>
+          
+          <div class="links">
+            <a href="/qr" class="link-btn link-btn-primary">📱 Scan QR</a>
+            <a href="/health" class="link-btn link-btn-secondary">❤️ Health</a>
+            <a href="/status" class="link-btn link-btn-secondary">📊 Status JSON</a>
+          </div>
+          
+          <div class="timestamp">Last updated: ${new Date().toLocaleString()}</div>
+        </div>
+      </div>
+    </body>
+    </html>
+  `);
 });
 
 app.get('/health', (req, res) => {
