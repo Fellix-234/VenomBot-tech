@@ -8,6 +8,8 @@ import {
 } from '@whiskeysockets/baileys';
 import pino from 'pino';
 import qrcode from 'qrcode-terminal';
+import fs from 'fs';
+import path from 'path';
 import { config } from '../config.js';
 import { logger } from '../utils/logger.js';
 import { handleMessages } from './messageHandler.js';
@@ -79,33 +81,101 @@ export const connectToWhatsApp = async () => {
       qrGenerated = false;
       currentQR = null;
 
-      // Capture bot ID
-      botId = sock.user?.id?.split(':')[0];
-      logger.info(`🔑 Session ID: ${botId}`);
+      // Capture bot ID - try multiple methods to ensure we get it
+      if (sock.user) {
+        // Method 1: Extract from user.id (format: "1234567890:XX@s.whatsapp.net")
+        if (sock.user.id) {
+          botId = sock.user.id.split(':')[0] || sock.user.id.split('@')[0];
+        }
+        // Method 2: Use user.name if id doesn't work
+        if (!botId && sock.user.name) {
+          botId = sock.user.name;
+        }
+        logger.info(`🔑 Bot User ID: ${sock.user.id}`);
+        logger.info(`🔑 Session ID: ${botId}`);
+      } else {
+        logger.warn('⚠️ Bot user info not available yet');
+      }
 
       // Send welcome message to owner
-      if (config.bot.owner) {
+      if (config.bot.owner && config.bot.owner.trim() !== '') {
         try {
           const ownerJid = config.bot.owner.includes('@') ? config.bot.owner : `${config.bot.owner}@s.whatsapp.net`;
-          const welcomeMsg = `╔════════════════════════════════════╗
-║                                ║
-║     ✅ ${config.bot.name} Connected!         ║
-║                                ║
-║  Session ID:                   ║
-║  ${botId}  ║
-║                                ║
-║  Version: ${config.bot.version}                  ║
-║  Prefix: ${config.bot.prefix}                     ║
-║                                ║
-║  Type !help to see commands    ║
-║                                ║
-╚════════════════════════════════════╝`;
+          
+          // Get full session information
+          const sessionInfo = {
+            phoneNumber: botId || 'N/A',
+            fullUserId: sock.user?.id || 'N/A',
+            userName: sock.user?.name || 'N/A'
+          };
+          
+          // Professional welcome message with image
+          const welcomeCaption = `┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
+┃                          ┃
+┃   ✅ *${config.bot.name.toUpperCase()} CONNECTED*   ┃
+┃                          ┃
+┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
-          await sock.sendMessage(ownerJid, { text: welcomeMsg });
-          logger.success('📨 Welcome message sent to owner');
+🎉 *Welcome to Your Professional WhatsApp Bot!*
+
+Your bot is now online and ready to serve you with advanced automation and smart features.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+🔐 *YOUR SESSION INFORMATION*
+
+📱 Phone Number: \`${sessionInfo.phoneNumber}\`
+🆔 Full User ID: \`${sessionInfo.fullUserId}\`
+👤 Username: \`${sessionInfo.userName}\`
+
+⚠️ *SECURITY WARNING*  
+🔒 Keep this information confidential
+🚫 Never share your session credentials
+💾 Save this information securely
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+📊 *BOT INFORMATION*
+▸ Version: *${config.bot.version}*
+▸ Prefix: *${config.bot.prefix}*
+▸ Status: *Active & Running*
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+💡 *QUICK START*
+Type *${config.bot.prefix}help* to view all available commands
+
+🌐 Need support? Visit our channel!
+${config.bot.channel}
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+_Powered by ${config.bot.name} v${config.bot.version}_
+_Professional WhatsApp Automation_`;
+
+          // Try to send with image from assets
+          const imagePath = path.join(config.paths.assets, 'WhatsApp Image 2026-02-27 at 15.42.21.jpeg');
+          
+          if (fs.existsSync(imagePath)) {
+            const imageBuffer = fs.readFileSync(imagePath);
+            await sock.sendMessage(ownerJid, { 
+              image: imageBuffer,
+              caption: welcomeCaption
+            });
+            logger.success('📨 Professional welcome message with image sent to owner');
+          } else {
+            // Fallback to text-only if image not found
+            await sock.sendMessage(ownerJid, { text: welcomeCaption });
+            logger.success('📨 Welcome message sent to owner (without image)');
+            logger.warn('Image not found at:', imagePath);
+          }
         } catch (error) {
           logger.error('Failed to send welcome message:', error.message);
+          logger.error('Error details:', error);
         }
+      } else {
+        logger.warn('⚠️ Owner number not configured. Set OWNER_NUMBER in .env file to receive session info.');
+        logger.info(`📝 Current bot session - Phone: ${botId || 'N/A'}, Full ID: ${sock.user?.id || 'N/A'}`);
       }
     }
   });
