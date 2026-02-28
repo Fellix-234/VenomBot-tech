@@ -883,26 +883,6 @@ app.get('/session', async (req, res) => {
           <h1>${config.bot.name}</h1>
           <p>Session Authentication Center</p>
           
-          <!-- Important Notice -->
-          <div style="background: linear-gradient(135deg, #ff6b6b 0%, #ff8b94 100%); border-left: 5px solid #cc3333; padding: 20px; border-radius: 12px; margin: 30px auto; max-width: 700px; color: white; text-align: left; box-shadow: 0 10px 30px rgba(255, 107, 107, 0.3);">
-            <h3 style="margin-bottom: 15px; display: flex; align-items: center; gap: 10px;">
-              <i class="fas fa-exclamation-triangle"></i> 
-              <span>IMPORTANT: Single User Session</span>
-            </h3>
-            <p style="line-height: 1.8; margin-bottom: 12px;">
-              ⚠️ <strong>One Bot Instance = One WhatsApp Account</strong><br/>
-              Once someone scans this QR code, the bot connects to THEIR WhatsApp account exclusively. Other users cannot scan the same bot instance.
-            </p>
-            <p style="line-height: 1.8; margin-bottom: 12px;">
-              <i class="fas fa-users"></i> <strong>Multiple Users?</strong><br/>
-              Each person needs their own bot deployment with their own session. Deploy on Render, Railway, or your own server.
-            </p>
-            <p style="line-height: 1.8; margin-bottom: 0;">
-              <i class="fas fa-redo"></i> <strong>Already Connected?</strong><br/>
-              To connect a different WhatsApp account, you must first clear the current session below.
-            </p>
-          </div>
-          
           <!-- Social Buttons -->
           <div class="social-buttons">
             <a href="https://wa.me/254725391914" class="social-btn social-btn-whatsapp" title="Contact Developer on WhatsApp" target="_blank">
@@ -998,43 +978,6 @@ app.get('/session', async (req, res) => {
                 </ol>
               </div>
             </form>
-          </div>
-
-          <!-- Session Management Card -->
-          <div class="card" style="max-width: 600px; margin: 0 auto;">
-            <div class="card-header">
-              <div class="card-icon" style="background: linear-gradient(135deg, #ff6b6b 0%, #ff8b94 100%);"><i class="fas fa-database"></i></div>
-              <div class="card-title">Session Management</div>
-            </div>
-
-            <div style="background: linear-gradient(135deg, #0f0f23 0%, #1a1a3a 100%); border: 2px solid #2d3561; border-radius: 12px; padding: 20px; margin-bottom: 20px;">
-              <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 15px;">
-                <span style="color: #94a3b8; font-weight: 600;">Session Status:</span>
-                <span id="sessionStatus" style="color: #34d399; font-weight: bold; display: flex; align-items: center; gap: 8px;">
-                  <i class="fas fa-sync fa-spin"></i> Checking...
-                </span>
-              </div>
-              <div id="sessionInfo" style="color: #cbd5e1; font-size: 0.9em; line-height: 1.6;"></div>
-            </div>
-
-            <button type="button" class="btn btn-refresh" onclick="clearSession(this)" style="width: 100%; font-size: 1.05em; padding: 16px;">
-              <i class="fas fa-trash-alt"></i> Clear Session & Connect New Account
-            </button>
-            
-            <div id="clearStatus" class="status"></div>
-
-            <div class="instructions" style="margin-top: 20px;">
-              <strong style="color: #ff6b6b;"><i class="fas fa-info-circle"></i> When to Clear Session:</strong>
-              <ul style="margin-top: 10px; margin-left: 20px;">
-                <li>Bot is already connected to someone else's WhatsApp</li>
-                <li>You want to connect a different WhatsApp account</li>
-                <li>You're experiencing connection issues</li>
-                <li>Someone else needs to use this bot instance</li>
-              </ul>
-              <p style="margin-top: 12px; color: #fca5a5;">
-                <strong>⚠️ Warning:</strong> Clearing the session will disconnect the current WhatsApp account and require scanning the QR code again with a different account.
-              </p>
-            </div>
           </div>
         </div>
 
@@ -1154,78 +1097,6 @@ app.get('/session', async (req, res) => {
             showStatus('<i class="fas fa-exclamation-triangle"></i> Pairing code expired', 'error');
           }, 60000);
         }
-
-        // Check session status
-        function checkSessionStatus() {
-          fetch('/api/session-status')
-            .then(response => response.json())
-            .then(data => {
-              const statusEl = document.getElementById('sessionStatus');
-              const infoEl = document.getElementById('sessionInfo');
-              
-              if (data.connected) {
-                statusEl.innerHTML = '<i class="fas fa-check-circle"></i> Connected';
-                statusEl.style.color = '#34d399';
-                infoEl.innerHTML =
-                  '<p><strong>Connected Account:</strong> ' + (data.phoneNumber || 'Unknown') + '</p>' +
-                  '<p><strong>User ID:</strong> ' + (data.userId || 'Unknown') + '</p>' +
-                  '<p style="margin-top: 10px; color: #fca5a5;">⚠️ This bot is currently connected to the WhatsApp account above. To connect a different account, you must clear the session first.</p>';
-              } else {
-                statusEl.innerHTML = '<i class="fas fa-times-circle"></i> Not Connected';
-                statusEl.style.color = '#fca5a5';
-                infoEl.innerHTML = '<p>No active session. Scan the QR code or use pairing code above to connect.</p>';
-              }
-            })
-            .catch(error => {
-              console.error('Failed to check session:', error);
-              document.getElementById('sessionStatus').innerHTML = '<i class="fas fa-exclamation-circle"></i> Error';
-              document.getElementById('sessionStatus').style.color = '#fbbf24';
-            });
-        }
-
-        // Clear session function
-        function clearSession(button) {
-          if (!confirm('⚠️ Are you sure you want to clear the current session?\\n\\nThis will:\\n• Disconnect the current WhatsApp account\\n• Delete all session data\\n• Require scanning QR code again\\n\\nClick OK to proceed.')) {
-            return;
-          }
-
-          button.disabled = true;
-          button.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Clearing Session...';
-
-          fetch('/api/clear-session', {
-            method: 'POST'
-          })
-          .then(response => response.json())
-          .then(data => {
-            button.disabled = false;
-            button.innerHTML = '<i class="fas fa-trash-alt"></i> Clear Session & Connect New Account';
-            
-            if (data.success) {
-              showClearStatus('✅ Session cleared successfully! Refreshing page...', 'success');
-              setTimeout(() => location.reload(), 2000);
-            } else {
-              showClearStatus('❌ Failed to clear session: ' + (data.error || 'Unknown error'), 'error');
-            }
-          })
-          .catch(error => {
-            button.disabled = false;
-            button.innerHTML = '<i class="fas fa-trash-alt"></i> Clear Session & Connect New Account';
-            showClearStatus('❌ Error: ' + error.message, 'error');
-          });
-        }
-
-        function showClearStatus(message, type) {
-          const status = document.getElementById('clearStatus');
-          status.innerHTML = message;
-          status.className = 'status show ' + type;
-          
-          setTimeout(() => {
-            status.classList.remove('show');
-          }, 5000);
-        }
-
-        // Check session on page load
-        checkSessionStatus();
 
         // Auto-refresh QR every 30 seconds
         setTimeout(() => location.reload(), 30000);
