@@ -1,10 +1,17 @@
 import chalk from 'chalk';
 import express from 'express';
 import QRCode from 'qrcode';
-import fs from 'fs';
 import { config } from './src/config.js';
 import { logger } from './src/utils/logger.js';
-import { connectToWhatsApp, getCurrentQR, requestPairingCode, getBotId, getSocket } from './src/modules/connection.js';
+import { connectToWhatsApp } from './src/modules/connection.js';
+import {
+  generateSessionId,
+  createSession,
+  getSessionStatus,
+  requestPairingCodeForSession,
+  cleanupSession,
+  cleanupAllSessions,
+} from './src/modules/sessionManager.js';
 import { initializeDatabase } from './src/database/db.js';
 import { loadCommands } from './src/modules/commandHandler.js';
 
@@ -248,7 +255,14 @@ app.get('/status', (req, res) => {
 // API endpoint to request pairing code
 app.post('/api/pairing-code', async (req, res) => {
   try {
-    const { phoneNumber } = req.body;
+    const { phoneNumber, sessionId } = req.body;
+
+    if (!sessionId) {
+      return res.status(400).json({
+        success: false,
+        error: 'Session ID is required'
+      });
+    }
     
     if (!phoneNumber) {
       return res.status(400).json({
@@ -265,8 +279,10 @@ app.post('/api/pairing-code', async (req, res) => {
       });
     }
 
-    logger.info(`📱 Requesting pairing code for: ${phoneNumber}`);
-    const pairingCode = await requestPairingCode(phoneNumber);
+    await createSession(sessionId);
+
+    logger.info(`📱 Requesting pairing code for session ${sessionId}: ${phoneNumber}`);
+    const pairingCode = await requestPairingCodeForSession(sessionId, phoneNumber);
     
     res.json({
       success: true,
@@ -285,27 +301,23 @@ app.post('/api/pairing-code', async (req, res) => {
 // API endpoint to check session status
 app.get('/api/session-status', (req, res) => {
   try {
-    const botId = getBotId();
-    const socket = getSocket();
-    
-    if (botId && socket && socket.user) {
-      res.json({
-        success: true,
-        connected: true,
-        phoneNumber: botId,
-        userId: socket.user?.id || 'Unknown',
-        userName: socket.user?.name || 'Unknown'
-      });
-    } else {
-      res.json({
-        success: true,
-        connected: false
+    const sessionId = req.query.sessionId;
+
+    if (!sessionId) {
+      return res.status(400).json({
+        success: false,
+        error: 'Session ID is required'
       });
     }
-  } catch (error) {
+
+    const status = getSessionStatus(sessionId);
     res.json({
       success: true,
-      connected: false,
+      ...status
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
       error: error.message
     });
   }
@@ -314,32 +326,24 @@ app.get('/api/session-status', (req, res) => {
 // API endpoint to clear session
 app.post('/api/clear-session', async (req, res) => {
   try {
-    const sessionPath = config.paths.session;
-    
-    logger.warn('🗑️ Clearing session data...');
-    
-    // Check if session folder exists
-    if (fs.existsSync(sessionPath)) {
-      // Delete the session folder
-      fs.rmSync(sessionPath, { recursive: true, force: true });
-      logger.success('✅ Session data cleared successfully');
-      
-      res.json({
-        success: true,
-        message: 'Session cleared. Please scan QR code or use pairing code to reconnect.'
-      });
-      
-      // Restart the bot after a short delay
-      setTimeout(() => {
-        logger.info('🔄 Restarting bot...');
-        process.exit(0); // The process manager will restart it
-      }, 2000);
-    } else {
-      res.json({
-        success: true,
-        message: 'No session data found'
+    const { sessionId } = req.body;
+
+    if (!sessionId) {
+      return res.status(400).json({
+        success: false,
+        error: 'Session ID is required'
       });
     }
+
+    const cleared = await cleanupSession(sessionId);
+
+    res.json({
+      success: true,
+      cleared,
+      message: cleared
+        ? 'Session cleared successfully'
+        : 'Session not found or already cleared'
+    });
   } catch (error) {
     logger.error('Failed to clear session:', error.message);
     res.status(500).json({
@@ -351,7 +355,16 @@ app.post('/api/clear-session', async (req, res) => {
 
 // Cool Session Page with QR and Pairing Code
 app.get('/session', async (req, res) => {
-  const qrData = getCurrentQR();
+  let sessionId = req.query.sid;
+
+  if (!sessionId) {
+    sessionId = generateSessionId();
+    return res.redirect(`/session?sid=${sessionId}`);
+  }
+
+  await createSession(sessionId);
+  const status = getSessionStatus(sessionId);
+  const qrData = status.qr;
   let qrImage = null;
 
   if (qrData) {
@@ -916,7 +929,7 @@ app.get('/session', async (req, res) => {
                   <div class="qr-display qr-pulse">
                     <img src="${qrImage}" alt="WhatsApp QR Code" style="max-width: 100%; height: auto;">
                   </div>
-                  <button type="button" class="btn btn-secondary" onclick="location.reload()" style="width: 100%; margin-top: 12px;"><i class="fas fa-sync"></i> Refresh QR Code</button>
+                  <button type="button" class="btn btn-secondary" onclick="location.href='/session?sid=${sessionId}'" style="width: 100%; margin-top: 12px;"><i class="fas fa-sync"></i> Refresh QR Code</button>
                   <p style="color: #64748b; margin-top: 10px; font-size: 0.85em; text-align: center;">Auto-refreshes every 30 seconds</p>
                 ` : `
                   <div class="qr-display">
@@ -925,7 +938,7 @@ app.get('/session', async (req, res) => {
                       <p style="font-size: 0.9em; color: #999;">The bot is initializing</p>
                     </div>
                   </div>
-                  <button type="button" class="btn btn-secondary" onclick="location.reload()" style="width: 100%; margin-top: 12px;"><i class="fas fa-redo"></i> Try Again</button>
+                  <button type="button" class="btn btn-secondary" onclick="location.href='/session?sid=${sessionId}'" style="width: 100%; margin-top: 12px;"><i class="fas fa-redo"></i> Try Again</button>
                 `}
 
                 <div class="instructions" style="margin-top: 15px;">
@@ -946,6 +959,12 @@ app.get('/session', async (req, res) => {
 
               <!-- Pairing Code Section -->
               <div class="form-group">
+                <label class="form-label"><i class="fas fa-id-badge"></i> Your Session ID</label>
+                <input type="text" id="sessionId" class="form-input" value="${sessionId}" readonly>
+                <small style="color: #64748b;">Use this Session ID on your deployment panel</small>
+              </div>
+
+              <div class="form-group">
                 <label class="form-label"><i class="fas fa-lock"></i> Method 2: Pairing Code</label>
                 <input type="tel" id="phoneNumber" class="form-input" placeholder="e.g., 254701881604" maxlength="15">
                 <small style="color: #64748b;">Enter your phone number (country code + digits only)</small>
@@ -960,7 +979,11 @@ app.get('/session', async (req, res) => {
 
               <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 15px;">
                 <button type="button" class="btn btn-primary" onclick="generatePairingCode()"><i class="fas fa-bolt"></i> Generate</button>
-                <button type="button" class="btn btn-copy" onclick="copyPairingCode()"><i class="fas fa-copy"></i> Copy Code</button>
+                <button type="button" class="btn btn-copy" onclick="copySessionId()"><i class="fas fa-copy"></i> Copy Session ID</button>
+              </div>
+
+              <div style="display: grid; grid-template-columns: 1fr; gap: 10px; margin-bottom: 15px;">
+                <button type="button" class="btn btn-copy" onclick="copyPairingCode()"><i class="fas fa-copy"></i> Copy Pairing Code</button>
               </div>
 
               <div id="statusMessage" class="status"></div>
@@ -989,6 +1012,7 @@ app.get('/session', async (req, res) => {
 
       <script>
         function generatePairingCode() {
+          const sessionId = document.getElementById('sessionId').value.trim();
           const phoneNumber = document.getElementById('phoneNumber').value.trim();
           
           if (!phoneNumber) {
@@ -1013,7 +1037,7 @@ app.get('/session', async (req, res) => {
             headers: {
               'Content-Type': 'application/json'
             },
-            body: JSON.stringify({ phoneNumber })
+            body: JSON.stringify({ phoneNumber, sessionId })
           })
           .then(response => {
             if (!response.ok) {
@@ -1077,6 +1101,16 @@ app.get('/session', async (req, res) => {
           });
         }
 
+        function copySessionId() {
+          const sessionId = document.getElementById('sessionId').value;
+
+          navigator.clipboard.writeText(sessionId).then(() => {
+            showStatus('<i class="fas fa-check-circle"></i> Session ID copied!', 'success');
+          }).catch(() => {
+            showStatus('<i class="fas fa-times-circle"></i> Failed to copy Session ID', 'error');
+          });
+        }
+
         function showStatus(message, type) {
           const status = document.getElementById('statusMessage');
           status.innerHTML = message;
@@ -1099,7 +1133,10 @@ app.get('/session', async (req, res) => {
         }
 
         // Auto-refresh QR every 30 seconds
-        setTimeout(() => location.reload(), 30000);
+        setTimeout(() => {
+          const sid = document.getElementById('sessionId').value;
+          location.href = '/session?sid=' + encodeURIComponent(sid);
+        }, 30000);
       </script>
     </body>
     </html>
@@ -1122,8 +1159,9 @@ process.on('uncaughtException', (error) => {
 });
 
 // Graceful shutdown
-process.on('SIGINT', () => {
+process.on('SIGINT', async () => {
   logger.info('Shutting down gracefully...');
+  await cleanupAllSessions();
   process.exit(0);
 });
 
