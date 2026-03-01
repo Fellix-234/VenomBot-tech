@@ -5,28 +5,37 @@ import { fileURLToPath } from 'url';
 import chalk from 'chalk';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const logsDir = path.join(__dirname, '../../logs');
+const isVercel = process.env.VERCEL === '1' || process.env.VERCEL_ENV;
+const logsDir = isVercel ? '/tmp/logs' : path.join(__dirname, '../../logs');
 
-// Create logs directory if it doesn't exist
-if (!fs.existsSync(logsDir)) {
-  fs.mkdirSync(logsDir, { recursive: true });
+// Create logs directory if it doesn't exist (skip on Vercel serverless)
+let logFileEnabled = true;
+try {
+  if (!fs.existsSync(logsDir)) {
+    fs.mkdirSync(logsDir, { recursive: true });
+  }
+} catch (error) {
+  logFileEnabled = false;
+  console.warn('[WARN] File logging disabled (read-only filesystem)');
 }
 
-// Create pino logger
-const pinoLogger = pino({
-  level: 'info',
-  transport: {
-    targets: [
-      {
-        target: 'pino/file',
-        options: {
-          destination: path.join(logsDir, `bot-${new Date().toISOString().split('T')[0]}.log`),
-          mkdir: true,
-        },
+// Create pino logger (console-only on Vercel)
+const pinoLogger = logFileEnabled
+  ? pino({
+      level: 'info',
+      transport: {
+        targets: [
+          {
+            target: 'pino/file',
+            options: {
+              destination: path.join(logsDir, `bot-${new Date().toISOString().split('T')[0]}.log`),
+              mkdir: true,
+            },
+          },
+        ],
       },
-    ],
-  },
-});
+    })
+  : pino({ level: 'info' });
 
 // Custom logger with colors
 export const logger = {
