@@ -193,14 +193,40 @@ export const requestPairingCodeForSession = async (sessionId, phoneNumber) => {
     throw new Error('Session already connected');
   }
 
+  // Wait for socket to be ready (max 5 seconds)
+  let attempts = 0;
+  while (!session.sock && attempts < 50) {
+    await new Promise(resolve => setTimeout(resolve, 100));
+    attempts++;
+  }
+
+  if (!session.sock) {
+    throw new Error('Socket not ready. Please try again.');
+  }
+
   let code;
   
-  if (typeof session.sock.requestPairingCode === 'function') {
-    code = await session.sock.requestPairingCode(cleaned);
-  } else if (typeof session.sock.requestPhoneNumberCode === 'function') {
-    code = await session.sock.requestPhoneNumberCode(cleaned);
-  } else {
-    throw new Error('Pairing code not supported');
+  try {
+    if (typeof session.sock.requestPairingCode === 'function') {
+      code = await session.sock.requestPairingCode(cleaned);
+    } else if (typeof session.sock.requestPhoneNumberCode === 'function') {
+      code = await session.sock.requestPhoneNumberCode(cleaned);
+    } else {
+      throw new Error('Pairing code method not available');
+    }
+
+    // Ensure code is properly formatted (8 characters, uppercase)
+    if (code) {
+      code = code.toString().toUpperCase().replace(/\s/g, '');
+      
+      // Format as XXXX-XXXX for better readability
+      if (code.length === 8) {
+        code = code.match(/.{1,4}/g).join('-');
+      }
+    }
+  } catch (error) {
+    logger.error(`Pairing code error for ${sessionId}:`, error.message);
+    throw new Error(`Failed to generate pairing code: ${error.message}`);
   }
 
   session.lastActivity = Date.now();
