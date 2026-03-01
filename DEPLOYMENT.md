@@ -5,9 +5,10 @@ This document contains step-by-step guides to deploy VenomBot Tech on various pl
 ## Table of Contents
 1. [Render](#render)
 2. [Railway](#railway)
-3. [Heroku](#heroku)
-4. [Replit](#replit)
-5. [VPS / Local Server](#vps--local-server)
+3. [Vercel (Frontend Proxy)](#vercel-frontend-proxy)
+4. [Heroku](#heroku)
+5. [Replit](#replit)
+6. [VPS / Local Server](#vps--local-server)
 
 ---
 
@@ -95,6 +96,45 @@ Fast and reliable deployment.
 7. **Access bot**
    - Railway assigns a domain automatically
    - Visit `YOUR-RAILWAY-URL/qr` to scan QR code
+
+---
+
+## Vercel (Frontend Proxy)
+
+Use Vercel as the public app URL while running the bot on a persistent host (Railway/Render/VPS).
+
+### Important Notes
+
+- Do **not** run this Baileys bot directly as a Vercel Serverless Function.
+- This repo includes `vercel.json` that forwards all routes to your backend.
+
+### Setup
+
+1. **Deploy backend first**
+   - Deploy this bot on Railway/Render/VPS
+   - Confirm backend works: `https://YOUR-BACKEND/session`
+
+2. **Update Vercel rewrite destination**
+   - Open `vercel.json`
+   - Replace:
+     `https://YOUR_BACKEND_DOMAIN/$1`
+   - With your real backend domain, for example:
+     `https://your-bot-production.up.railway.app/$1`
+
+3. **Push changes to GitHub**
+   ```bash
+   git add vercel.json DEPLOYMENT.md
+   git commit -m "Configure Vercel as proxy to persistent backend"
+   git push origin main
+   ```
+
+4. **Import repo in Vercel**
+   - Create a new Vercel project from your GitHub repo
+   - Deploy with default settings
+
+5. **Verify Vercel URL**
+   - `https://YOUR-VERCEL-DOMAIN/session?sid=test001`
+   - `https://YOUR-VERCEL-DOMAIN/api/session-status?sessionId=test001`
 
 ---
 
