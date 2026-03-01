@@ -197,7 +197,7 @@ export const requestPairingCodeForSession = async (sessionId, phoneNumber) => {
 
   // Ensure socket exists
   if (!session.sock) {
-    throw new Error('Socket not initialized. Creating socket...');
+    throw new Error('Socket not initialized. Please try again in a moment.');
   }
 
   // Check socket is NOT already authenticated (critical!)
@@ -208,21 +208,28 @@ export const requestPairingCodeForSession = async (sessionId, phoneNumber) => {
   let code;
   
   try {
-    logger.info(`🔗 Pairing code request: Phone=${cleaned}, Socket=${session.sock ? 'ready' : 'not ready'}`);
+    logger.info(`🔗 Pairing request: ${cleaned}`);
     
-    // Check for pairing code method
-    if (!session.sock.requestPairingCode && !session.sock.requestPhoneNumberCode) {
-      throw new Error('Baileys version does not support pairing codes. Please upgrade @whiskeysockets/baileys');
+    // Check what methods are available on the socket for better debugging
+    const hasRequestPairingCode = typeof session.sock.requestPairingCode === 'function';
+    const hasRequestPhoneNumberCode = typeof session.sock.requestPhoneNumberCode === 'function';
+    
+    logger.info(`→ Available methods: requestPairingCode=${hasRequestPairingCode}, requestPhoneNumberCode=${hasRequestPhoneNumberCode}`);
+    
+    if (!hasRequestPairingCode && !hasRequestPhoneNumberCode) {
+      logger.error(`❌ No pairing code methods available on socket`);
+      logger.error(`Available socket methods: ${Object.getOwnPropertyNames(Object.getPrototypeOf(session.sock)).filter(m => m.includes('request')).join(', ') || 'none found'}`);
+      throw new Error('Pairing code functions not available in Baileys socket');
     }
 
     // Create timeout wrapper
     const timeoutMs = 20000; // 20 seconds - WhatsApp server timeout
     const requestPromise = (async () => {
       try {
-        if (typeof session.sock.requestPairingCode === 'function') {
+        if (hasRequestPairingCode) {
           logger.info('→ Calling requestPairingCode');
           code = await session.sock.requestPairingCode(cleaned);
-        } else if (typeof session.sock.requestPhoneNumberCode === 'function') {
+        } else if (hasRequestPhoneNumberCode) {
           logger.info('→ Calling requestPhoneNumberCode');
           code = await session.sock.requestPhoneNumberCode(cleaned);
         }
@@ -240,7 +247,7 @@ export const requestPairingCodeForSession = async (sessionId, phoneNumber) => {
 
     // Apply timeout
     const timeoutPromise = new Promise((_, reject) => {
-      const timer = setTimeout(() => {
+      setTimeout(() => {
         reject(new Error(`WhatsApp server timeout after ${timeoutMs}ms`));
       }, timeoutMs);
     });
@@ -266,8 +273,8 @@ export const requestPairingCodeForSession = async (sessionId, phoneNumber) => {
       throw new Error('WhatsApp server not responding. Try again in 30 seconds.');
     } else if (msg.includes('already')) {
       throw new Error('Device already linked to this account. Use QR code or clear session.');
-    } else if (msg.includes('not supported')) {
-      throw new Error('Pairing codes not supported. Use QR code method instead or upgrade.');
+    } else if (msg.includes('function') || msg.includes('not available')) {
+      throw new Error('Pairing code function not found. Try updating Baileys or use QR code instead.');
     } else if (msg.includes('invalid') || msg.includes('format')) {
       throw new Error(`Phone number format issue: "${phoneNumber}" - Try with country code (e.g., 254701234567)`);
     }

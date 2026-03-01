@@ -298,9 +298,22 @@ app.post('/api/pairing-code', async (req, res) => {
     });
   } catch (error) {
     logger.error('Pairing code error:', error.message);
+    
+    let userError = error.message;
+    let suggestion = '';
+    
+    // Add helpful suggestions for common errors
+    if (error.message.includes('not found') || error.message.includes('not function')) {
+      userError = 'Pairing code feature unavailable';
+      suggestion = ' - Please use the QR code method instead.';
+    } else if (error.message.includes('Baileys')) {
+      userError = 'Baileys compatibility issue';
+      suggestion = ' - Try using QR code method or refresh the page.';
+    }
+    
     res.status(500).json({
       success: false,
-      error: error.message || 'Failed to generate pairing code'
+      error: userError + suggestion || 'Failed to generate pairing code'
     });
   }
 });
