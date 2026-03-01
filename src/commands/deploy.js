@@ -24,7 +24,6 @@ export default {
     text += `• Health: ${liveBaseUrl}/health\n`;
     text += `• Status: ${liveBaseUrl}/status\n`;
     text += `• Session: ${liveBaseUrl}/session\n`;
-    text += `• QR: ${liveBaseUrl}/qr\n`;
     text += `• Session API: ${liveBaseUrl}/api/session-status?sessionId=VenomBot-User-01\n\n`;
 
     text += `👥 *User Session Link Pattern*\n`;

@@ -25,6 +25,7 @@ export const config = {
 
   // Bot Settings
   settings: {
+    mainBotEnabled: process.env.MAIN_BOT_ENABLED === 'true',
     autoRead: process.env.AUTO_READ === 'true',
     autoTyping: process.env.AUTO_TYPING === 'true',
     autoRecording: process.env.AUTO_RECORDING === 'true',

@@ -223,7 +223,7 @@ app.get('/', (req, res) => {
           </div>
           
           <div class="links">
-            <a href="/qr" class="link-btn link-btn-primary"><i class="fas fa-qrcode"></i> Scan QR</a>
+            <a href="/session" class="link-btn link-btn-primary"><i class="fas fa-users-cog"></i> Session Panel</a>
             <a href="/health" class="link-btn link-btn-secondary"><i class="fas fa-heartbeat"></i> Health</a>
             <a href="/status" class="link-btn link-btn-secondary"><i class="fas fa-chart-bar"></i> Status JSON</a>
           </div>
@@ -1237,9 +1237,14 @@ const main = async () => {
     await loadCommands();
     logger.commands(79, 79);
     
-    // Connect to WhatsApp
-    logger.info('📱 Connecting to WhatsApp...');
-    await connectToWhatsApp();
+    // Optional single-account main bot connection
+    if (config.settings.mainBotEnabled) {
+      logger.info('📱 Connecting to WhatsApp (main bot mode)...');
+      await connectToWhatsApp();
+    } else {
+      logger.info('🧩 Session panel mode active (MAIN_BOT_ENABLED=false)');
+      logger.info('📝 Staff should connect via /session with their own Session ID');
+    }
     
     logger.success('✨ Bot is ready!');
     logger.deployment({
@@ -1268,8 +1273,7 @@ const server = app.listen(PORT, '0.0.0.0', () => {
     chalk.green('✓') + ' Server Status: ' + chalk.bold('Active'),
     chalk.green('✓') + ' Port: ' + chalk.bold(PORT),
     chalk.green('✓') + ' Interface: ' + chalk.bold('0.0.0.0'),
-    chalk.blue('→') + ' Session: ' + chalk.cyan(`http://localhost:${PORT}/session`),
-    chalk.blue('→') + ' QR Code: ' + chalk.cyan(`http://localhost:${PORT}/qr`),
+    chalk.blue('→') + ' Session Panel: ' + chalk.cyan(`http://localhost:${PORT}/session`),
     chalk.blue('→') + ' Health: ' + chalk.cyan(`http://localhost:${PORT}/health`),
   ]);
   logger.info('⏳ Bot initialization in progress...\n');

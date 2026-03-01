@@ -7,7 +7,6 @@ import {
   Browsers,
 } from '@whiskeysockets/baileys';
 import pino from 'pino';
-import qrcode from 'qrcode-terminal';
 import fs from 'fs';
 import path from 'path';
 import { config } from '../config.js';
@@ -73,10 +72,7 @@ export const connectToWhatsApp = async () => {
     if (qr) {
       currentQR = qr;
       if (!qrGenerated) {
-        logger.info('📱 Scan QR code to login:');
-        qrcode.generate(qr, { small: true });
-        const renderUrl = process.env.RENDER_EXTERNAL_URL || `http://localhost:${process.env.PORT || 3000}`;
-        logger.info(`🌐 Or visit: ${renderUrl}/qr to scan from browser`);
+        logger.info('📱 Main bot QR generated (hidden from terminal logs)');
         qrGenerated = true;
       }
     }

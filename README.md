@@ -1,122 +1,168 @@
-<div align="center">
+# VenomBot Tech
 
-<img src="assets/WhatsApp%20Image%202026-02-27%20at%2015.43.32.jpeg" alt="VenomBot Banner" width="100%" />
+![VenomBot Tech Banner](assets/WhatsApp%20Image%202026-02-27%20at%2015.43.32.jpeg)
 
-<img src="https://readme-typing-svg.herokuapp.com?font=Fira+Code&weight=600&size=28&pause=1000&color=4ECDC4&center=true&vCenter=true&width=900&lines=VenomBot+Tech+%7C+Professional+WhatsApp+Bot;Modern+Baileys+Bot+with+60%2B+Commands;QR+%2B+Pairing+Auth+%7C+Cloud+Ready+%7C+Open+Source" alt="Typing SVG" />
+![Typing Animation](https://readme-typing-svg.herokuapp.com?font=Fira+Code&weight=700&size=24&pause=1200&color=22C55E&width=1000&lines=Professional+WhatsApp+Automation;Session+Panel+First+Architecture;Multi-Session+Ready+for+Teams;Deploy+Fast+on+Render+%7C+Railway+%7C+Replit)
 
-<table>
-  <tr>
-    <td align="center">
-      <b>Repository</b><br/><br/>
-      <a href="https://github.com/Fellix-234/VenomBot-Tech/stargazers"><img src="https://img.shields.io/github/stars/Fellix-234/VenomBot-Tech?style=for-the-badge&logo=github&color=facc15" alt="Stars"/></a>
-      <a href="https://github.com/Fellix-234/VenomBot-Tech/network/members"><img src="https://img.shields.io/github/forks/Fellix-234/VenomBot-Tech?style=for-the-badge&logo=github&color=f97316" alt="Forks"/></a>
-      <a href="https://github.com/Fellix-234/VenomBot-Tech/blob/main/LICENSE"><img src="https://img.shields.io/github/license/Fellix-234/VenomBot-Tech?style=for-the-badge&color=ef4444" alt="License"/></a>
-      <img src="https://img.shields.io/badge/Node.js-18%2B-22c55e?style=for-the-badge&logo=node.js" alt="Node"/>
-    </td>
-  </tr>
-  <tr>
-    <td align="center">
-      <b>Live Access</b><br/><br/>
-      <a href="https://venombot-tech.onrender.com/session"><img src="https://img.shields.io/badge/Get%20Session-Live%20Auth%20Page-2563eb?style=for-the-badge&logo=whatsapp" alt="Session"/></a>
-      <a href="https://venombot-tech.onrender.com/"><img src="https://img.shields.io/badge/Status-Live%20Dashboard-10b981?style=for-the-badge&logo=google-chrome&logoColor=white" alt="Status"/></a>
-      <a href="https://venombot-tech.onrender.com/health"><img src="https://img.shields.io/badge/Health-API%20OK-0ea5e9?style=for-the-badge&logo=vercel&logoColor=white" alt="Health"/></a>
-    </td>
-  </tr>
-  <tr>
-    <td align="center">
-      <b>One-Click Deploy</b><br/><br/>
-      <a href="https://render.com/deploy?repo=https://github.com/Fellix-234/VenomBot-Tech"><img src="https://img.shields.io/badge/Deploy-Render-46E3B7?style=for-the-badge&logo=render&logoColor=000" alt="Render"/></a>
-      <a href="https://railway.app/new?template=https://github.com/Fellix-234/VenomBot-Tech"><img src="https://img.shields.io/badge/Deploy-Railway-0B0D0E?style=for-the-badge&logo=railway" alt="Railway"/></a>
-      <a href="https://replit.com/github/Fellix-234/VenomBot-Tech"><img src="https://img.shields.io/badge/Deploy-Replit-F26207?style=for-the-badge&logo=replit&logoColor=fff" alt="Replit"/></a>
-    </td>
-  </tr>
-  <tr>
-    <td align="center">
-      <b>Quick Actions</b><br/><br/>
-      <a href="https://wa.me/254725391914"><img src="https://img.shields.io/badge/WhatsApp-Dev%201-25d366?style=for-the-badge&logo=whatsapp&logoColor=white" alt="WhatsApp Dev 1"/></a>
-      <a href="https://wa.me/254701881604"><img src="https://img.shields.io/badge/WhatsApp-Dev%202-25d366?style=for-the-badge&logo=whatsapp&logoColor=white" alt="WhatsApp Dev 2"/></a>
-      <a href="https://github.com/Fellix-234/VenomBot-Tech/issues"><img src="https://img.shields.io/badge/Issues-Report%20Bug-ff6b6b?style=for-the-badge&logo=github&logoColor=white" alt="Issues"/></a>
-      <a href="https://github.com/Fellix-234/VenomBot-Tech/blob/main/CONTRIBUTING.md"><img src="https://img.shields.io/badge/Contribute-Help%20Out-8b5cf6?style=for-the-badge&logo=github&logoColor=white" alt="Contributing"/></a>
-    </td>
-  </tr>
-</table>
+**Professional WhatsApp Bot** • Multi-session onboarding • Cloud-ready deployment
 
-</div>
+[![Node.js](https://img.shields.io/badge/Node.js-18%2B-339933?style=for-the-badge&logo=node.js&logoColor=white)](#quick-start)
+[![License](https://img.shields.io/github/license/Fellix-234/VenomBot-Tech?style=for-the-badge)](LICENSE)
+[![Stars](https://img.shields.io/github/stars/Fellix-234/VenomBot-Tech?style=for-the-badge&logo=github)](https://github.com/Fellix-234/VenomBot-Tech/stargazers)
+[![Forks](https://img.shields.io/github/forks/Fellix-234/VenomBot-Tech?style=for-the-badge&logo=github)](https://github.com/Fellix-234/VenomBot-Tech/network/members)
+
+[![Last Commit](https://img.shields.io/github/last-commit/Fellix-234/VenomBot-Tech?style=for-the-badge&logo=github)](https://github.com/Fellix-234/VenomBot-Tech/commits/main)
+[![Repo Size](https://img.shields.io/github/repo-size/Fellix-234/VenomBot-Tech?style=for-the-badge&logo=github)](https://github.com/Fellix-234/VenomBot-Tech)
+[![Issues](https://img.shields.io/github/issues/Fellix-234/VenomBot-Tech?style=for-the-badge&logo=github)](https://github.com/Fellix-234/VenomBot-Tech/issues)
+[![PRs](https://img.shields.io/github/issues-pr/Fellix-234/VenomBot-Tech?style=for-the-badge&logo=github)](https://github.com/Fellix-234/VenomBot-Tech/pulls)
+
+[![Live Status](https://img.shields.io/badge/Live%20Status-Open-10b981?style=for-the-badge&logo=google-chrome&logoColor=white)](https://venombot-tech-1.onrender.com/)
+[![Session Panel](https://img.shields.io/badge/Session%20Panel-Open-2563eb?style=for-the-badge&logo=whatsapp&logoColor=white)](https://venombot-tech-1.onrender.com/session)
+[![Health](https://img.shields.io/badge/Health-API%20OK-0ea5e9?style=for-the-badge&logo=vercel&logoColor=white)](https://venombot-tech-1.onrender.com/health)
+
+[![Deploy to Render](https://img.shields.io/badge/Deploy-Render-46E3B7?style=for-the-badge&logo=render&logoColor=000)](https://render.com/deploy?repo=https://github.com/Fellix-234/VenomBot-Tech)
+[![Deploy to Railway](https://img.shields.io/badge/Deploy-Railway-0B0D0E?style=for-the-badge&logo=railway)](https://railway.app/new?template=https://github.com/Fellix-234/VenomBot-Tech)
+[![Deploy to Replit](https://img.shields.io/badge/Deploy-Replit-F26207?style=for-the-badge&logo=replit&logoColor=fff)](https://replit.com/github/Fellix-234/VenomBot-Tech)
 
 ---
 
-## What is VenomBot Tech?
+## Quick Navigation
 
-VenomBot Tech is a production-ready WhatsApp bot built with Baileys, designed for modern multi-device sessions, group management, automation, and media/fun commands.
-
-### Highlights
-- 60+ commands across utility, admin, media, and fun categories
-- Live web session page with QR and pairing authentication
-- Auto features: autoread, autotyping, autorecording, autoreact
-- Group moderation tools: kick, promote, demote, tag, anti-link
-- JSON + MongoDB support with fallback architecture
-- Cloud-ready for Render, Railway, Replit, Heroku, VPS
+- [Overview](#overview)
+- [Quick Access](#quick-access)
+- [Quick Start](#quick-start)
+- [Session Architecture](#session-architecture)
+- [Command Highlights](#command-highlights)
+- [Deployment](#deployment)
+- [Project Structure](#project-structure)
+- [Community & Support](#community--support)
 
 ---
 
-## Live Session & Dashboard
+## Overview
 
-- Session page: https://venombot-tech.onrender.com/session
-- Status page: https://venombot-tech.onrender.com/
-- Health endpoint: https://venombot-tech.onrender.com/health
+VenomBot Tech is a production-ready WhatsApp bot powered by Baileys with a professional web onboarding flow, rich command ecosystem, and deployment-friendly architecture.
+
+### Why this bot
+
+- Professional session panel (`/session`) for user onboarding
+- Multi-session architecture with isolated session IDs
+- 80+ commands across utility, admin, fun, and media
+- JSON database with MongoDB fallback support
+- Stable startup and reconnect handling
+- Ready for Render, Railway, Replit, and VPS hosting
+
+### Stack Snapshot
+
+![Baileys](https://img.shields.io/badge/Baileys-WhatsApp%20MD-25D366?style=flat-square&logo=whatsapp&logoColor=white)
+![Express](https://img.shields.io/badge/Express.js-Backend-000000?style=flat-square&logo=express&logoColor=white)
+![Node](https://img.shields.io/badge/Node.js-18%2B-339933?style=flat-square&logo=node.js&logoColor=white)
+![Render](https://img.shields.io/badge/Hosting-Render-46E3B7?style=flat-square&logo=render&logoColor=000)
+![Database](https://img.shields.io/badge/Database-JSON%20%2F%20MongoDB-0ea5e9?style=flat-square&logo=mongodb&logoColor=white)
+![License](https://img.shields.io/badge/License-MIT-f43f5e?style=flat-square)
+
+---
+
+## Quick Access
+
+- **Live App:** [venombot-tech-1.onrender.com](https://venombot-tech-1.onrender.com/)
+- **Session Panel:** [/session](https://venombot-tech-1.onrender.com/session)
+- **Health API:** [/health](https://venombot-tech-1.onrender.com/health)
+- **Status API:** [/status](https://venombot-tech-1.onrender.com/status)
 
 ---
 
 ## Quick Start
 
 ### 1) Clone
+
 ```bash
 git clone https://github.com/Fellix-234/VenomBot-Tech.git
 cd VenomBot-Tech
 ```
 
-### 2) Install
+### 2) Install dependencies
+
 ```bash
 npm install
 ```
 
-### 3) Configure
-```bash
-cp .env.example .env
-```
+### 3) Configure environment
 
-Edit `.env` and set at least:
+Create `.env` from `.env.example` and set at least:
+
 - `BOT_NAME`
 - `PREFIX`
-- `OWNER_NUMBER` (your WhatsApp number with country code)
+- `OWNER_NUMBER`
+- `MAIN_BOT_ENABLED=false` (recommended for session-panel mode)
 
-### 4) Run
+### 4) Start bot
+
 ```bash
 npm start
 ```
 
-### 5) Connect
+### 5) Onboard users
+
 Open:
+
 - `http://localhost:3000/session`
 
-Then link with either:
-- QR Code scan
-- Pairing code by phone number
+Give each user a unique session link:
+
+- `http://localhost:3000/session?sid=VenomBot-User-01`
 
 ---
 
-## Core Commands
+## Session Architecture
+
+- The app runs best in **Session Panel Mode** (`MAIN_BOT_ENABLED=false`)
+- Staff/users pair their own sessions from the `/session` page
+- Every `sid` is isolated and managed independently
+- Pairing can be done by QR or phone-number code from the panel
+
+### Session Flow
+
+1. Open the session panel URL
+2. Create or receive a unique `sid`
+3. Pair using QR or phone-number code
+4. Verify session status via API endpoint
+5. Manage user sessions independently
+
+---
+
+## Command Highlights
 
 | Category | Examples |
-|---|---|
+| --- | --- |
 | General | `!help`, `!ping`, `!info`, `!uptime`, `!owner` |
-| Group | `!tag`, `!kick`, `!promote`, `!demote`, `!groupinfo` |
-| Media | `!sticker`, `!image`, `!lyrics`, `!youtube`, `!spotify` |
-| Fun | `!8ball`, `!dice`, `!flip`, `!choose`, `!trivia`, `!meme` |
-| Utility | `!weather`, `!calc`, `!crypto`, `!password`, `!qrgen` |
-| AI / Search | `!gpt`, `!wikipedia`, `!define`, `!news` |
+| Admin/Group | `!tag`, `!kick`, `!promote`, `!demote`, `!groupinfo` |
+| Utilities | `!weather`, `!calc`, `!crypto`, `!password`, `!qrgen` |
+| Media | `!sticker`, `!image`, `!lyrics`, `!song`, `!youtube` |
+| AI/Search | `!gpt`, `!wikipedia`, `!define`, `!news` |
+| Professional | `!dashboard`, `!support`, `!deploy` |
 
-> Full command files are in `src/commands/`.
+All commands are located in `src/commands/`.
+
+---
+
+## Deployment
+
+Use the full deployment guide in [DEPLOYMENT.md](DEPLOYMENT.md).
+
+### Supported targets
+
+- Render
+- Railway
+- Replit
+- Heroku
+- VPS / Dedicated server
+
+### Recommended Production Mode
+
+- Use **Session Panel Mode** with `MAIN_BOT_ENABLED=false`
+- Keep one isolated `sid` per staff/user
+- Use health and status endpoints in your deployment monitor
 
 ---
 
@@ -131,67 +177,49 @@ VenomBot-Tech/
 │   ├── utils/
 │   └── config.js
 ├── assets/
+├── auth_info_baileys/
 ├── index.js
-├── package.json
+├── server.js
 └── README.md
 ```
 
 ---
 
-## Deployment
+## GitHub Stats
 
-Use the complete deployment guide:
-- [DEPLOYMENT.md](DEPLOYMENT.md)
+![GitHub Stats](https://github-readme-stats.vercel.app/api?username=Fellix-234&repo=VenomBot-Tech&show_icons=true&theme=tokyonight&hide_border=true&count_private=true)
 
-Supports:
-- Render
-- Railway
-- Replit
-- Heroku
-- VPS / Local Server
+![Top Languages](https://github-readme-stats.vercel.app/api/top-langs/?username=Fellix-234&layout=compact&theme=tokyonight&hide_border=true)
+
+![Streak Stats](https://github-readme-streak-stats.herokuapp.com/?user=Fellix-234&theme=tokyonight&hide_border=true)
 
 ---
 
 ## Developers
 
-<div align="center">
-
-<table>
-  <tr>
-    <td align="center">
-      <img src="assets/WhatsApp%20Image%202026-02-27%20at%2015.42.21.jpeg" width="100" height="100" alt="Developer 1"/>
-      <br/>
-      <b>Wondering Jew</b>
-      <br/>
-      <a href="https://wa.me/254725391914">WhatsApp</a>
-    </td>
-    <td align="center">
-      <img src="assets/WhatsApp%20Image%202026-02-27%20at%2015.42.22.jpeg" width="100" height="100" alt="Developer 2"/>
-      <br/>
-      <b>Warrior Felix</b>
-      <br/>
-      <a href="https://wa.me/254701881604">WhatsApp</a>
-    </td>
-  </tr>
-</table>
-
-</div>
+[![Wondering Jew](https://img.shields.io/badge/WhatsApp-Wondering%20Jew-25d366?style=for-the-badge&logo=whatsapp&logoColor=white)](https://wa.me/254725391914)
+[![Warrior Felix](https://img.shields.io/badge/WhatsApp-Warrior%20Felix-25d366?style=for-the-badge&logo=whatsapp&logoColor=white)](https://wa.me/254701881604)
 
 ---
 
 ## Community & Support
 
-- Issues: https://github.com/Fellix-234/VenomBot-Tech/issues
-- Contributing Guide: [CONTRIBUTING.md](CONTRIBUTING.md)
+- Report issues: [GitHub Issues](https://github.com/Fellix-234/VenomBot-Tech/issues)
+- Contributing: [CONTRIBUTING.md](CONTRIBUTING.md)
 - Code of Conduct: [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md)
 - License: [LICENSE](LICENSE)
 
 ---
 
-<div align="center">
+## Maintained With
 
-### If this project helped you, please star and fork it.
+[![Maintenance](https://img.shields.io/badge/Maintained-Yes-22c55e?style=for-the-badge)](https://github.com/Fellix-234/VenomBot-Tech)
+[![Open Source](https://img.shields.io/badge/Open%20Source-Community%20Driven-2563eb?style=for-the-badge)](https://github.com/Fellix-234/VenomBot-Tech)
+[![Contributions](https://img.shields.io/badge/Contributions-Welcome-f59e0b?style=for-the-badge)](CONTRIBUTING.md)
 
-<a href="https://github.com/Fellix-234/VenomBot-Tech">Star</a> • <a href="https://github.com/Fellix-234/VenomBot-Tech/fork">Fork</a>
+---
 
-</div>
+If this project helps you, please support it:
+
+[![Star Repo](https://img.shields.io/badge/⭐%20Star%20Repo-GitHub-black?style=for-the-badge&logo=github)](https://github.com/Fellix-234/VenomBot-Tech)
+[![Fork Repo](https://img.shields.io/badge/🍴%20Fork%20Repo-GitHub-1f6feb?style=for-the-badge&logo=github)](https://github.com/Fellix-234/VenomBot-Tech/fork)
