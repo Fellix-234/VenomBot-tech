@@ -53,15 +53,18 @@ export const connectToWhatsApp = async () => {
 
   sock = makeWASocket({
     version,
-    logger: pino({ level: 'silent' }),
-    printQRInTerminal: false,
+    logger: pino({ level: 'debug' }),
+    printQRInTerminal: true,
     auth: {
       creds: state.creds,
       keys: makeCacheableSignalKeyStore(state.keys, pino({ level: 'silent' })),
     },
     browser: Browsers.ubuntu('VenomBot'),
+    // Mobile must be FALSE for QR code generation
+    mobile: false,
+    connectTimeoutMs: 60000,
     getMessage: async (key) => {
-      return { conversation: '' };
+      return { conversation: 'ping' };
     },
   });
 

@@ -81,18 +81,23 @@ export const createSession = async (sessionId) => {
 
     const sock = makeWASocket({
       version,
-      logger: pino({ level: 'silent' }),
-      printQRInTerminal: false,
+      logger: pino({ level: 'debug' }),
+      printQRInTerminal: true,
       auth: {
         creds: state.creds,
         keys: makeCacheableSignalKeyStore(state.keys, pino({ level: 'silent' })),
       },
       browser: Browsers.ubuntu(`VenomBot-${sessionId.substring(0, 8)}`),
-      // Add mobile mode for better compatibility
-      mobile: true,
+      // Mobile must be FALSE for QR code generation to work properly
+      mobile: false,
       connectTimeoutMs: 60000,
       keepAliveIntervalMs: 30000,
-      getMessage: async () => ({ conversation: '' }),
+      // Required for QR code to work
+      getMessage: async (key) => {
+        return {
+          conversation: 'ping'
+        };
+      },
     });
 
     const sessionData = {
