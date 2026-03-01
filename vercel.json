@@ -2,7 +2,7 @@
   "rewrites": [
     {
       "source": "/:path*",
-      "destination": "https://YOUR_BACKEND_DOMAIN/:path*"
+      "destination": "https://venombot-tech-1.onrender.com/:path*"
     }
   ]
 }
