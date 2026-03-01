@@ -1024,8 +1024,37 @@ app.get('/session', async (req, res) => {
                 </div>
               </div>
 
-              <!-- Session ID hidden -->
+              <!-- Divider -->
+              <div style="margin: 20px 0; border-top: 1px solid #2d3561;"></div>
+
+              <!-- Pairing Code Section -->
               <input type="hidden" id="sessionId" value="${sessionId}">
+
+              <div class="form-group">
+                <label class="form-label"><i class="fas fa-phone"></i> Method 2: Pairing Code</label>
+                <input type="tel" id="phoneNumber" class="form-input" placeholder="254701881604" maxlength="15">
+                <small style="color: #64748b;">Phone number with country code (digits only)</small>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label">Generated Code</label>
+                <div class="code-display">
+                  <span id="pairingCode" class="code-placeholder">Generate above...</span>
+                </div>
+              </div>
+
+              <button type="button" class="btn btn-primary" onclick="generatePairingCode()" style="width: 100%; padding: 14px; font-size: 1em;"><i class="fas fa-bolt"></i> Generate Pairing Code</button>
+              <div id="statusMessage" class="status"></div>
+
+              <div class="instructions" style="margin-top: 15px;">
+                <strong style="color: #45b7d1;"><i class="fas fa-book"></i> Pairing Code Steps:</strong>
+                <ol style="margin-top: 8px; font-size: 0.9em;">
+                  <li>Enter your WhatsApp phone number above</li>
+                  <li>Click <strong>Generate Pairing Code</strong></li>
+                  <li>Go to WhatsApp → <strong>Settings</strong> → <strong>Linked Devices</strong> → <strong>Link with Phone Number</strong></li>
+                  <li>Enter the generated code</li>
+                  <li>Code valid for 60 seconds</li>
+                </ol>
             </form>
           </div>
         </div>
@@ -1038,32 +1067,63 @@ app.get('/session', async (req, res) => {
 
       <script>
         // Session page functionality
-        function showStatus(message, type) {
-          console.log(message);
-        }
+        function generatePairingCode() {
+          const sessionId = document.getElementById('sessionId').value.trim();
+          const phoneNumber = document.getElementById('phoneNumber').value.trim();
           
           if (!phoneNumber) {
             showStatus('❌ Please enter a phone number', 'error');
             return;
           }
 
-          if (!/^\\d{10,15}$/.test(phoneNumber)) {
-            showStatus('❌ Invalid format. Use only digits (10-15 digits including country code)', 'error');
+          if (!/^\d{10,15}$/.test(phoneNumber)) {
+            showStatus('❌ Invalid format. Use digits only (10-15 with country code)', 'error');
             return;
           }
 
-          // Show loading state
           const button = event.target;
           button.disabled = true;
-          button.innerHTML = '⏳ Requesting from WhatsApp...';
-          showStatus('⏳ Connecting to WhatsApp servers...', 'success');
+          button.innerHTML = '⏳ Generating code...';
 
-          // Call API to get real pairing code from WhatsApp
           fetch('/api/pairing-code', {
             method: 'POST',
-            headers: {
-              'Content-Type': 'application/json'
-            },
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ phoneNumber, sessionId })
+          })
+          .then(response => response.json())
+          .then(data => {
+            button.disabled = false;
+            button.innerHTML = '<i class="fas fa-bolt"></i> Generate Pairing Code';
+
+            if (data.success && data.code) {
+              document.getElementById('pairingCode').textContent = data.code;
+              document.getElementById('pairingCode').classList.remove('code-placeholder');
+              showStatus('✅ Code ready! ' + data.code + ' - Code valid for 60 seconds', 'success');
+              startCodeTimer();
+            } else {
+              showStatus('❌ ' + (data.error || 'Failed to generate code'), 'error');
+            }
+          })
+          .catch(error => {
+            button.disabled = false;
+            button.innerHTML = '<i class="fas fa-bolt"></i> Generate Pairing Code';
+            showStatus('❌ Error: ' + error.message, 'error');
+          });
+        }
+
+        function showStatus(message, type) {
+          const status = document.getElementById('statusMessage');
+          status.innerHTML = message;
+          status.className = 'status show ' + type;
+          setTimeout(() => status.classList.remove('show'), type === 'success' ? 8000 : 5000);
+        }
+
+        function startCodeTimer() {
+          setTimeout(() => {
+            document.getElementById('pairingCode').textContent = 'Code expired';
+            document.getElementById('pairingCode').classList.add('code-placeholder');
+          }, 60000);
+        },
             body: JSON.stringify({ phoneNumber, sessionId })
           })
           .then(response => {
