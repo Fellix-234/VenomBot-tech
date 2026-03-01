@@ -1024,46 +1024,8 @@ app.get('/session', async (req, res) => {
                 </div>
               </div>
 
-              <!-- Divider -->
-              <div style="margin: 25px 0; border-top: 1px solid #2d3561; padding-top: 20px;">
-                <p style="text-align: center; color: #64748b; font-size: 0.85em; font-weight: 600;">— OR —</p>
-              </div>
-
-              <!-- Pairing Code Section -->
+              <!-- Session ID hidden -->
               <input type="hidden" id="sessionId" value="${sessionId}">
-
-              <div class="form-group">
-                <label class="form-label"><i class="fas fa-phone"></i> Method 2: Pairing Code</label>
-                <input type="tel" id="phoneNumber" class="form-input" placeholder="254701881604" maxlength="15">
-                <small style="color: #64748b;">Enter your WhatsApp number with country code (digits only, no + or spaces)</small>
-              </div>
-
-              <div class="form-group">
-                <label class="form-label">Generated Pairing Code</label>
-                <div class="code-display">
-                  <span id="pairingCode" class="code-placeholder">Enter number above...</span>
-                </div>
-              </div>
-
-              <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 10px; margin-bottom: 15px;">
-                <button type="button" class="btn btn-primary" onclick="generatePairingCode()" style="font-size: 1.1em; padding: 16px;"><i class="fas fa-bolt"></i> Generate Pairing Code</button>
-                <button type="button" class="btn btn-secondary" onclick="switchToQR()" style="font-size: 1.1em; padding: 16px;"><i class="fas fa-qrcode"></i> Use QR Instead</button>
-              </div>
-
-              <div id="statusMessage" class="status"></div>
-
-              <div class="instructions" style="margin-top: 15px;">
-                <strong style="color: #45b7d1;"><i class="fas fa-book"></i> Pairing Connection Steps:</strong>
-                <ol style="margin-top: 8px;">
-                  <li>Enter your WhatsApp phone number above (with country code)</li>
-                  <li>Click <strong>Generate Pairing Code</strong> button</li>
-                  <li>WhatsApp will send you a notification on your phone</li>
-                  <li>Open WhatsApp and tap the notification</li>
-                  <li>Or manually: Open <strong>WhatsApp</strong> → <strong>Settings</strong> → <strong>Linked Devices</strong> → <strong>Link with Phone Number</strong></li>
-                  <li>Enter the generated code</li>
-                  <li>Code is valid for 60 seconds only</li>
-                </ol>
-              </div>
             </form>
           </div>
         </div>
@@ -1075,9 +1037,10 @@ app.get('/session', async (req, res) => {
       </div>
 
       <script>
-        function generatePairingCode() {
-          const sessionId = document.getElementById('sessionId').value.trim();
-          const phoneNumber = document.getElementById('phoneNumber').value.trim();
+        // Session page functionality
+        function showStatus(message, type) {
+          console.log(message);
+        }
           
           if (!phoneNumber) {
             showStatus('❌ Please enter a phone number', 'error');
