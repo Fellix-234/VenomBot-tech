@@ -585,6 +585,58 @@ app.get('/session', async (req, res) => {
           margin: 10px 0;
         }
 
+        /* Method Tabs */
+        .method-tabs {
+          display: grid;
+          grid-template-columns: 1fr 1fr;
+          gap: 10px;
+          margin-bottom: 30px;
+          background: #0f0f23;
+          padding: 8px;
+          border-radius: 12px;
+          border: 1px solid #2d3561;
+        }
+
+        .method-tab {
+          padding: 14px 18px;
+          background: transparent;
+          border: 2px solid transparent;
+          border-radius: 8px;
+          color: #94a3b8;
+          font-size: 0.9em;
+          font-weight: 600;
+          cursor: pointer;
+          transition: all 0.3s;
+          text-transform: uppercase;
+          letter-spacing: 0.5px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          gap: 8px;
+        }
+
+        .method-tab:hover {
+          background: #1a1a3a;
+          border-color: #2d3561;
+          color: #cbd5e1;
+        }
+
+        .method-tab.active {
+          background: linear-gradient(135deg, #45b7d1 0%, #4ecdc4 100%);
+          border-color: #45b7d1;
+          color: white;
+          box-shadow: 0 4px 12px rgba(69, 183, 209, 0.3);
+        }
+
+        .method-content {
+          display: none;
+        }
+
+        .method-content.active {
+          display: block;
+          animation: fadeIn 0.3s ease-in;
+        }
+
         /* Pairing Section */
         .pairing-form {
           display: flex;
