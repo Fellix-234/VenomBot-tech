@@ -62,12 +62,22 @@ const getSessionPath = (sessionId) => {
 export const createSession = async (sessionId) => {
   try {
     if (sessions.has(sessionId)) {
-      return sessions.get(sessionId);
+      const existingSession = sessions.get(sessionId);
+      // If existing session is not connected, reset it
+      if (!existingSession.connected) {
+        logger.info(`Session ${sessionId} exists but not connected, recreating...`);
+        await cleanupSession(sessionId);
+      } else {
+        logger.info(`Session ${sessionId} already exists and connected`);
+        return existingSession;
+      }
     }
 
     const sessionPath = getSessionPath(sessionId);
     const { state, saveCreds } = await useMultiFileAuthState(sessionPath);
     const { version } = await fetchLatestBaileysVersion();
+
+    logger.info(`Creating new session: ${sessionId} with Baileys v${version.join('.')}`);
 
     const sock = makeWASocket({
       version,
@@ -78,6 +88,10 @@ export const createSession = async (sessionId) => {
         keys: makeCacheableSignalKeyStore(state.keys, pino({ level: 'silent' })),
       },
       browser: Browsers.ubuntu(`VenomBot-${sessionId.substring(0, 8)}`),
+      // Add mobile mode for better compatibility
+      mobile: true,
+      connectTimeoutMs: 60000,
+      keepAliveIntervalMs: 30000,
       getMessage: async () => ({ conversation: '' }),
     });
 
@@ -85,6 +99,7 @@ export const createSession = async (sessionId) => {
       sessionId,
       sock,
       qr: null,
+      qrUpdatedAt: null,
       connected: false,
       botId: null,
       createdAt: Date.now(),
@@ -97,18 +112,45 @@ export const createSession = async (sessionId) => {
     sock.ev.on('connection.update', async (update) => {
       const { connection, lastDisconnect, qr } = update;
 
+      // Log all connection updates for debugging
+      logger.info(`Session ${sessionId} connection update:`, {
+        connection,
+        hasQR: !!qr,
+        qrPreview: qr ? qr.substring(0, 50) + '...' : null
+      });
+
       if (qr) {
+        // Store the raw QR string from Baileys
         sessionData.qr = qr;
+        sessionData.qrUpdatedAt = Date.now();
         sessionData.lastActivity = Date.now();
-        logger.info(`QR generated for session: ${sessionId}`);
+        logger.info(`QR code received for session: ${sessionId}`);
       }
 
       if (connection === 'open') {
         sessionData.connected = true;
-        sessionData.qr = null;
+        sessionData.qr = null; // Clear QR after successful connection
         sessionData.botId = sock.user?.id?.split(':')[0] || sock.user?.id?.split('@')[0];
         sessionData.lastActivity = Date.now();
         logger.success(`Session connected: ${sessionId} (${sessionData.botId})`);
+        
+        // Send session ID to user's WhatsApp DM
+        try {
+          const userJid = sock.user?.id;
+          if (userJid) {
+            const welcomeMessage = `✅ *VenomBot Connected Successfully!*\n\n` +
+              `🆔 *Your Session ID:*\n\`\`\`${sessionId}\`\`\`\n\n` +
+              `📱 *Bot ID:* ${sessionData.botId}\n` +
+              `🕒 *Connected at:* ${new Date().toLocaleString()}\n\n` +
+              `Keep this Session ID private and secure!\n\n` +
+              `Type *!help* to see available commands.`;
+            
+            await sock.sendMessage(userJid, { text: welcomeMessage });
+            logger.success(`Session ID sent to user: ${sessionData.botId}`);
+          }
+        } catch (dmError) {
+          logger.error(`Failed to send DM: ${dmError.message}`);
+        }
       }
 
       if (connection === 'close') {
@@ -119,6 +161,8 @@ export const createSession = async (sessionId) => {
         
         if (!shouldReconnect) {
           logger.warn(`Session logged out: ${sessionId}`);
+        } else {
+          logger.info(`Session connection closed, will retry: ${sessionId}`);
         }
       }
     });
@@ -129,9 +173,11 @@ export const createSession = async (sessionId) => {
     sessions.set(sessionId, sessionData);
     resetSessionTimeout(sessionId);
 
+    logger.info(`Session created: ${sessionId}`);
     return sessionData;
   } catch (error) {
     logger.error(`Failed to create session ${sessionId}:`, error.message);
+    logger.error('Stack:', error.stack);
     throw error;
   }
 };
@@ -159,18 +205,39 @@ export const getSessionStatus = (sessionId) => {
       exists: false,
       connected: false,
       qr: null,
-      botId: null
+      botId: null,
+      message: 'Session not found'
     };
   }
+
+  // Check if session is stale (no activity for too long)
+  const now = Date.now();
+  const timeSinceLastActivity = now - session.lastActivity;
+  const isStale = timeSinceLastActivity > 120000; // 2 minutes
 
   return {
     exists: true,
     connected: session.connected,
-    qr: session.qr,
+    qr: session.qr, // Return raw QR string from Baileys
+    qrUpdatedAt: session.qrUpdatedAt,
     botId: session.botId,
     createdAt: session.createdAt,
-    sessionId: session.sessionId
+    sessionId: session.sessionId,
+    lastActivity: session.lastActivity,
+    isStale: isStale,
+    timeSinceLastActivity: timeSinceLastActivity
   };
+};
+
+/**
+ * Get QR code directly for API
+ */
+export const getSessionQR = (sessionId) => {
+  const session = sessions.get(sessionId);
+  if (!session) {
+    return null;
+  }
+  return session.qr;
 };
 
 /**
@@ -180,57 +247,68 @@ export const requestPairingCodeForSession = async (sessionId, phoneNumber) => {
   const session = sessions.get(sessionId);
   
   if (!session) {
-    throw new Error('Session not found. Create a new session first.');
+    throw new Error('Session not found. Please refresh the page to create a new session.');
   }
 
   if (session.connected) {
-    throw new Error('Cannot generate pairing code - session already connected.');
+    throw new Error('Session already connected. Cannot generate new pairing code.');
   }
 
   // Clean and validate phone number
   let cleaned = phoneNumber.toString().replace(/\D/g, '');
   
   if (cleaned.length < 10 || cleaned.length > 15) {
-    throw new Error(`Invalid phone number: ${cleaned.length} digits. Need 10-15 with country code.`);
+    throw new Error(`Invalid phone number: ${cleaned.length} digits. Need 10-15 digits with country code.`);
   }
 
   if (!session.sock) {
-    throw new Error('Socket not ready. Please try again.');
+    throw new Error('Socket not ready. Please refresh the page and try again.');
   }
 
-  // Socket shouldn't be authenticated yet
-  if (session.sock.user && session.sock.user.id) {
-    throw new Error('Session already authenticated. Cannot request pairing code.');
+  logger.info(`📱 Requesting pairing code for session ${sessionId}: ${cleaned}`);
+
+  // Check if socket has the required method
+  if (typeof session.sock.requestPairingCode !== 'function') {
+    logger.error('requestPairingCode method not available on socket');
+    throw new Error('Pairing code not supported in this Baileys version. Please use QR code method instead.');
   }
 
   try {
-    logger.info(`📱 Requesting pairing code for: ${cleaned}`);
+    logger.info('Calling requestPairingCode method...');
     
-    // Import the pairing code function directly from Baileys if available
-    const { getPhoneNumber } = await import('@whiskeysockets/baileys');
+    // Request the pairing code from Baileys
+    const code = await session.sock.requestPairingCode(cleaned);
     
-    // Generate 8-digit pairing code (standard format)
-    const code = Math.random().toString().substring(2, 10);
-    const paddedCode = code.padStart(8, '0');
-    const formattedCode = paddedCode.match(/.{1,4}/g).join('-');
-    
-    logger.success(`✅ Pairing code generated: ${formattedCode}`);
-    return formattedCode;
+    if (!code) {
+      throw new Error('No pairing code returned from WhatsApp');
+    }
 
-  } catch (error) {
-    logger.error(`Pairing error: ${error.message}`);
+    // Format the code (Baileys returns it as a string)
+    const formattedCode = String(code).trim();
     
-    // If custom generation failed, we could try direct Baileys method as fallback
-    try {
-      if (typeof session.sock.requestPairingCode === 'function') {
-        const code = await session.sock.requestPairingCode(cleaned);
-        return String(code).trim();
-      }
-    } catch (fallbackError) {
-      logger.error(`Fallback pairing method failed: ${fallbackError.message}`);
+    // Format as XXXX-XXXX if not already formatted
+    const finalCode = formattedCode.includes('-') ? formattedCode : 
+      formattedCode.match(/.{1,4}/g)?.join('-') || formattedCode;
+    
+    logger.success(`✅ Pairing code generated: ${finalCode}`);
+    session.lastActivity = Date.now();
+    
+    return finalCode;
+  } catch (error) {
+    logger.error(`Pairing code error: ${error.message}`);
+    
+    // Provide more specific error messages
+    if (error.message.includes('not supported')) {
+      throw new Error('Pairing code not available. Please use the QR code scan method instead.');
+    } else if (error.message.includes('timeout') || error.message.includes('ETIMEDOUT')) {
+      throw new Error('Connection timeout. Please check your internet and try again.');
+    } else if (error.message.includes('already connected')) {
+      throw new Error('This phone number is already linked. Use QR code instead.');
+    } else if (error.message.includes('invalid')) {
+      throw new Error('Invalid phone number. Please check and try again.');
     }
     
-    throw new Error('Unable to generate pairing code. Use QR code method instead.');
+    throw new Error(`Unable to generate pairing code: ${error.message}`);
   }
 };
 

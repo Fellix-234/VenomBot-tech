@@ -69,10 +69,18 @@ export const connectToWhatsApp = async () => {
   sock.ev.on('connection.update', async (update) => {
     const { connection, lastDisconnect, qr } = update;
 
+    // Log connection updates for debugging
+    logger.info('Connection update:', {
+      connection,
+      hasQR: !!qr,
+      qrType: qr ? (qr.startsWith('data:') ? 'base64' : 'string') : 'none'
+    });
+
     if (qr) {
+      // Store the raw QR string from Baileys
       currentQR = qr;
       if (!qrGenerated) {
-        logger.info('📱 Main bot QR generated (hidden from terminal logs)');
+        logger.info('📱 QR code received (waiting for scan)');
         qrGenerated = true;
       }
     }
@@ -364,25 +372,25 @@ export const requestPairingCode = async (phoneNumber) => {
       throw new Error('Bot is already authenticated. Delete auth_info_baileys folder to start fresh.');
     }
     
-    let code;
-    
-    // Try requestPairingCode method (standard Baileys method)
-    if (typeof sock.requestPairingCode === 'function') {
-      logger.info('Using requestPairingCode method');
-      code = await sock.requestPairingCode(cleaned);
-    } else if (typeof sock.requestPhoneNumberCode === 'function') {
-      logger.info('Using requestPhoneNumberCode method');
-      code = await sock.requestPhoneNumberCode(cleaned);
-    } else {
+    // Check if requestPairingCode method exists
+    if (typeof sock.requestPairingCode !== 'function') {
       throw new Error('Pairing code not supported. Your Baileys version may be outdated. Use QR code instead.');
     }
     
+    logger.info('Calling requestPairingCode method...');
+    const code = await sock.requestPairingCode(cleaned);
+
     if (!code) {
       throw new Error('Failed to generate pairing code from WhatsApp');
     }
 
-    logger.success(`✅ Pairing code generated: ${code}`);
-    return code;
+    // Format the code
+    const formattedCode = String(code).trim();
+    const finalCode = formattedCode.includes('-') ? formattedCode : 
+      formattedCode.match(/.{1,4}/g)?.join('-') || formattedCode;
+
+    logger.success(`✅ Pairing code generated: ${finalCode}`);
+    return finalCode;
   } catch (error) {
     logger.error('Pairing code error:', error.message);
     
@@ -391,6 +399,8 @@ export const requestPairingCode = async (phoneNumber) => {
       throw new Error('Bot already connected. Delete session to generate new pairing code.');
     } else if (error.message.includes('not supported')) {
       throw new Error('Pairing codes not available. Please use the QR code method instead.');
+    } else if (error.message.includes('timeout') || error.message.includes('ETIMEDOUT')) {
+      throw new Error('Connection timeout. Please check your internet and try again.');
     }
     
     throw error;
