@@ -180,85 +180,99 @@ export const requestPairingCodeForSession = async (sessionId, phoneNumber) => {
   const session = sessions.get(sessionId);
   
   if (!session) {
-    throw new Error('Session not found');
-  }
-
-  // Validate and clean phone number
-  let cleaned = phoneNumber.toString().replace(/\D/g, '');
-  
-  if (cleaned.length < 10 || cleaned.length > 15) {
-    throw new Error('Phone number must be 10-15 digits. Example: 254725391914');
+    throw new Error('Session not found. Create a new session first.');
   }
 
   if (session.connected) {
-    throw new Error('Session already connected');
+    throw new Error('Cannot generate pairing code - session already connected. Clear session and try again.');
   }
 
-  // Wait for socket to be ready with timeout
-  let attempts = 0;
-  const maxAttempts = 100;
-  while (!session.sock && attempts < maxAttempts) {
-    await new Promise(resolve => setTimeout(resolve, 100));
-    attempts++;
+  // Format phone number: remove all non-digits
+  let cleaned = phoneNumber.toString().replace(/\D/g, '');
+  
+  // Validate length
+  if (cleaned.length < 10 || cleaned.length > 15) {
+    throw new Error(`Invalid phone length: ${cleaned.length} digits. Must be 10-15 digits.`);
   }
 
+  // Ensure socket exists
   if (!session.sock) {
-    throw new Error('Socket not ready. Please try again in a few seconds.');
+    throw new Error('Socket not initialized. Creating socket...');
   }
 
-  // Ensure socket is not already authenticated
+  // Check socket is NOT already authenticated (critical!)
   if (session.sock.user && session.sock.user.id) {
-    throw new Error('Session already authenticated. Cannot generate pairing code.');
+    throw new Error(`Socket already authenticated as ${session.sock.user.id}. Cannot generate pairing code.`);
   }
 
   let code;
-  const timeoutMs = 15000; // 15 second timeout for pairing code request
   
   try {
-    logger.info(`🔄 Requesting pairing code for ${cleaned} (${attempts * 100}ms socket ready)`);
+    logger.info(`🔗 Pairing code request: Phone=${cleaned}, Socket=${session.sock ? 'ready' : 'not ready'}`);
     
-    // Create promise with timeout
-    const pairingCodePromise = (async () => {
-      if (typeof session.sock.requestPairingCode === 'function') {
-        logger.info('→ Using requestPairingCode method');
-        return await session.sock.requestPairingCode(cleaned);
-      } else if (typeof session.sock.requestPhoneNumberCode === 'function') {
-        logger.info('→ Using requestPhoneNumberCode method');
-        return await session.sock.requestPhoneNumberCode(cleaned);
-      } else {
-        throw new Error('Pairing code method not available in Baileys');
+    // Check for pairing code method
+    if (!session.sock.requestPairingCode && !session.sock.requestPhoneNumberCode) {
+      throw new Error('Baileys version does not support pairing codes. Please upgrade @whiskeysockets/baileys');
+    }
+
+    // Create timeout wrapper
+    const timeoutMs = 20000; // 20 seconds - WhatsApp server timeout
+    const requestPromise = (async () => {
+      try {
+        if (typeof session.sock.requestPairingCode === 'function') {
+          logger.info('→ Calling requestPairingCode');
+          code = await session.sock.requestPairingCode(cleaned);
+        } else if (typeof session.sock.requestPhoneNumberCode === 'function') {
+          logger.info('→ Calling requestPhoneNumberCode');
+          code = await session.sock.requestPhoneNumberCode(cleaned);
+        }
+        
+        if (!code) {
+          throw new Error('WhatsApp returned empty code');
+        }
+        
+        return code;
+      } catch (innerError) {
+        logger.error(`Request method error: ${innerError.message}`);
+        throw innerError;
       }
     })();
 
-    // Add timeout
-    const timeoutPromise = new Promise((_, reject) =>
-      setTimeout(() => reject(new Error(`Pairing code request timeout after ${timeoutMs}ms`)), timeoutMs)
-    );
+    // Apply timeout
+    const timeoutPromise = new Promise((_, reject) => {
+      const timer = setTimeout(() => {
+        reject(new Error(`WhatsApp server timeout after ${timeoutMs}ms`));
+      }, timeoutMs);
+    });
 
-    code = await Promise.race([pairingCodePromise, timeoutPromise]);
+    code = await Promise.race([requestPromise, timeoutPromise]);
 
-    if (!code) {
-      throw new Error('Pairing code is empty or undefined');
+    // Validate code format
+    const codeStr = String(code).trim();
+    
+    if (!codeStr || codeStr.length < 4) {
+      throw new Error(`Invalid code format: "${codeStr}"`);
     }
 
-    // Return code as-is, don't modify formatting
-    const result = code.toString().trim();
-    logger.success(`✅ Pairing code received: "${result}" (length: ${result.length})`);
-    
-    return result;
+    logger.success(`✅ Pairing code ready: ${codeStr}`);
+    return codeStr;
+
   } catch (error) {
-    logger.error(`❌ Pairing code error for ${sessionId}:`, error.message);
+    logger.error(`❌ Pairing error for ${sessionId}:`, error.message);
     
-    // Provide helpful troubleshooting messages
-    if (error.message.includes('timeout')) {
-      throw new Error('WhatsApp server not responding. Please try again.');
-    } else if (error.message.includes('not available')) {
-      throw new Error('Pairing codes not supported. Update Baileys package or use QR code instead.');
-    } else if (error.message.includes('already authenticated')) {
-      throw new Error('Session already has an active account. Clear the session and try again.');
+    // Enhanced error messages
+    const msg = error.message.toLowerCase();
+    if (msg.includes('timeout')) {
+      throw new Error('WhatsApp server not responding. Try again in 30 seconds.');
+    } else if (msg.includes('already')) {
+      throw new Error('Device already linked to this account. Use QR code or clear session.');
+    } else if (msg.includes('not supported')) {
+      throw new Error('Pairing codes not supported. Use QR code method instead or upgrade.');
+    } else if (msg.includes('invalid') || msg.includes('format')) {
+      throw new Error(`Phone number format issue: "${phoneNumber}" - Try with country code (e.g., 254701234567)`);
     }
     
-    throw new Error(`Pairing code failed: ${error.message}`);
+    throw new Error(`Pairing failed: ${error.message}`);
   }
 
   session.lastActivity = Date.now();

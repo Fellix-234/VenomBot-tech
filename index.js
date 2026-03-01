@@ -1124,15 +1124,31 @@ app.get('/session', async (req, res) => {
             console.error('Pairing code error:', error);
             
             let errorMsg = error.message;
+            let suggestion = '';
             
-            // Provide helpful error messages
-            if (errorMsg.includes('Pairing')) {
-              errorMsg = 'Pairing code not available. Try using the QR code method instead.';
+            // Enhanced error messages with helpful suggestions
+            if (errorMsg.includes('timeout')) {
+              errorMsg = 'WhatsApp server timeout. Please wait 30 seconds and try again.';
+              suggestion = 'The server may be busy.';
+            } else if (errorMsg.includes('already') || errorMsg.includes('authenticated')) {
+              errorMsg = 'Device already linked. Clear session and try again.';
+              suggestion = 'Use QR code method as alternative.';
+            } else if (errorMsg.includes('not supported')) {
+              errorMsg = 'Pairing codes not available in this version.';
+              suggestion = 'Use QR code method instead.';
+            } else if (errorMsg.includes('invalid') || errorMsg.includes('format')) {
+              errorMsg = 'Invalid phone number format.';
+              suggestion = 'Use format: 254701234567 (country code + digits only)';
+            } else if (errorMsg.includes('Pairing')) {
+              errorMsg = 'Pairing code feature unavailable.';
+              suggestion = 'Try QR code method or refresh the page.';
             } else if (errorMsg.includes('not available')) {
-              errorMsg = 'WhatsApp pairing not available in this Baileys version. Use QR code instead.';
+              errorMsg = 'Service temporarily unavailable.';
+              suggestion = 'Try again in a few moments or use QR code.';
             }
             
-            showStatus('❌ Error: ' + errorMsg, 'error');
+            const fullError = suggestion ? errorMsg + ' (' + suggestion + ')' : errorMsg;
+            showStatus('❌ ' + fullError, 'error');
           });
         }
 
