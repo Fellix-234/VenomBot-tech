@@ -1045,8 +1045,9 @@ app.get('/session', async (req, res) => {
                 </div>
               </div>
 
-              <div style="display: grid; grid-template-columns: 1fr; gap: 10px; margin-bottom: 15px;">
-                <button type="button" class="btn btn-primary" onclick="generatePairingCode()" style="width: 100%; font-size: 1.1em; padding: 16px;"><i class="fas fa-bolt"></i> Generate Pairing Code</button>
+              <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 10px; margin-bottom: 15px;">
+                <button type="button" class="btn btn-primary" onclick="generatePairingCode()" style="font-size: 1.1em; padding: 16px;"><i class="fas fa-bolt"></i> Generate Pairing Code</button>
+                <button type="button" class="btn btn-secondary" onclick="switchToQR()" style="font-size: 1.1em; padding: 16px;"><i class="fas fa-qrcode"></i> Use QR Instead</button>
               </div>
 
               <div id="statusMessage" class="status"></div>
@@ -1184,6 +1185,16 @@ app.get('/session', async (req, res) => {
             document.getElementById('pairingCode').classList.add('code-placeholder');
             showStatus('<i class="fas fa-exclamation-triangle"></i> Pairing code expired', 'error');
           }, 60000);
+        }
+
+        // Switch to QR code method
+        function switchToQR() {
+          const sessionId = document.getElementById('sessionId').value;
+          showStatus('🔄 Switching to QR code method...', 'success');
+          setTimeout(() => {
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+            showStatus('✅ Scroll up to see the QR code. Scan with WhatsApp!', 'success');
+          }, 500);
         }
 
         // Auto-refresh QR every 30 seconds
