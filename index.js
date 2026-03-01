@@ -1010,16 +1010,12 @@ app.get('/session', async (req, res) => {
               </div>
 
               <!-- Pairing Code Section -->
-              <div class="form-group">
-                <label class="form-label"><i class="fas fa-id-badge"></i> Your Session ID</label>
-                <input type="text" id="sessionId" class="form-input" value="${sessionId}" readonly>
-                <small style="color: #64748b;">Use this Session ID on your deployment panel</small>
-              </div>
+              <input type="hidden" id="sessionId" value="${sessionId}">
 
               <div class="form-group">
-                <label class="form-label"><i class="fas fa-lock"></i> Method 2: Pairing Code</label>
-                <input type="tel" id="phoneNumber" class="form-input" placeholder="e.g., 254701881604" maxlength="15">
-                <small style="color: #64748b;">Enter your phone number (country code + digits only)</small>
+                <label class="form-label"><i class="fas fa-phone"></i> Method 2: Pairing Code</label>
+                <input type="tel" id="phoneNumber" class="form-input" placeholder="254701881604" maxlength="15">
+                <small style="color: #64748b;">Enter your WhatsApp number with country code (digits only, no + or spaces)</small>
               </div>
 
               <div class="form-group">
@@ -1029,13 +1025,8 @@ app.get('/session', async (req, res) => {
                 </div>
               </div>
 
-              <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 15px;">
-                <button type="button" class="btn btn-primary" onclick="generatePairingCode()"><i class="fas fa-bolt"></i> Generate</button>
-                <button type="button" class="btn btn-copy" onclick="copySessionId()"><i class="fas fa-copy"></i> Copy Session ID</button>
-              </div>
-
               <div style="display: grid; grid-template-columns: 1fr; gap: 10px; margin-bottom: 15px;">
-                <button type="button" class="btn btn-copy" onclick="copyPairingCode()"><i class="fas fa-copy"></i> Copy Pairing Code</button>
+                <button type="button" class="btn btn-primary" onclick="generatePairingCode()" style="width: 100%; font-size: 1.1em; padding: 16px;"><i class="fas fa-bolt"></i> Generate Pairing Code</button>
               </div>
 
               <div id="statusMessage" class="status"></div>
@@ -1043,11 +1034,11 @@ app.get('/session', async (req, res) => {
               <div class="instructions" style="margin-top: 15px;">
                 <strong style="color: #45b7d1;"><i class="fas fa-book"></i> Pairing Connection Steps:</strong>
                 <ol style="margin-top: 8px;">
-                  <li>Enter your WhatsApp phone number above</li>
-                  <li>Click <strong>Generate</strong> and wait for the code</li>
-                  <li>Open <strong>WhatsApp</strong> on your phone</li>
-                  <li>Go to <strong>Settings</strong> → <strong>Linked Devices</strong></li>
-                  <li>Tap <strong>Link with Phone Number</strong></li>
+                  <li>Enter your WhatsApp phone number above (with country code)</li>
+                  <li>Click <strong>Generate Pairing Code</strong> button</li>
+                  <li>WhatsApp will send you a notification on your phone</li>
+                  <li>Open WhatsApp and tap the notification</li>
+                  <li>Or manually: Open <strong>WhatsApp</strong> → <strong>Settings</strong> → <strong>Linked Devices</strong> → <strong>Link with Phone Number</strong></li>
                   <li>Enter the generated code</li>
                   <li>Code is valid for 60 seconds only</li>
                 </ol>
@@ -1080,8 +1071,8 @@ app.get('/session', async (req, res) => {
           // Show loading state
           const button = event.target;
           button.disabled = true;
-          button.textContent = '⏳ Requesting from WhatsApp...';
-          showStatus('⏳ Connecting to WhatsApp servers...', 'info');
+          button.innerHTML = '⏳ Requesting from WhatsApp...';
+          showStatus('⏳ Connecting to WhatsApp servers...', 'success');
 
           // Call API to get real pairing code from WhatsApp
           fetch('/api/pairing-code', {
@@ -1101,7 +1092,7 @@ app.get('/session', async (req, res) => {
           })
           .then(data => {
             button.disabled = false;
-            button.textContent = '<i class="fas fa-bolt"></i> Generate';
+            button.innerHTML = '<i class="fas fa-bolt"></i> Generate Pairing Code';
 
             if (data.success) {
               // Format the code for display - ensure it's a string
@@ -1113,7 +1104,7 @@ app.get('/session', async (req, res) => {
               
               document.getElementById('pairingCode').textContent = formattedCode;
               document.getElementById('pairingCode').classList.remove('code-placeholder');
-              showStatus('✅ Real WhatsApp pairing code generated! Valid for 60 seconds.', 'success');
+              showStatus('✅ WhatsApp will send you a notification! Check your phone and enter this code: ' + formattedCode, 'success');
               console.log('Generated pairing code:', formattedCode);
               startCodeTimer();
             } else {
@@ -1122,7 +1113,7 @@ app.get('/session', async (req, res) => {
           })
           .catch(error => {
             button.disabled = false;
-            button.textContent = '<i class="fas fa-bolt"></i> Generate';
+            button.innerHTML = '<i class="fas fa-bolt"></i> Generate Pairing Code';
             console.error('Pairing code error:', error);
             
             let errorMsg = error.message;
@@ -1138,31 +1129,6 @@ app.get('/session', async (req, res) => {
           });
         }
 
-        function copyPairingCode() {
-          const code = document.getElementById('pairingCode').textContent;
-          
-          if (code === 'Enter number above...') {
-            showStatus('<i class="fas fa-times-circle"></i> Generate a code first', 'error');
-            return;
-          }
-
-          navigator.clipboard.writeText(code).then(() => {
-            showStatus('<i class="fas fa-check-circle"></i> Code copied to clipboard!', 'success');
-          }).catch(() => {
-            showStatus('<i class="fas fa-times-circle"></i> Failed to copy code', 'error');
-          });
-        }
-
-        function copySessionId() {
-          const sessionId = document.getElementById('sessionId').value;
-
-          navigator.clipboard.writeText(sessionId).then(() => {
-            showStatus('<i class="fas fa-check-circle"></i> Session ID copied!', 'success');
-          }).catch(() => {
-            showStatus('<i class="fas fa-times-circle"></i> Failed to copy Session ID', 'error');
-          });
-        }
-
         function showStatus(message, type) {
           const status = document.getElementById('statusMessage');
           status.innerHTML = message;
@@ -1170,7 +1136,7 @@ app.get('/session', async (req, res) => {
           
           setTimeout(() => {
             status.classList.remove('show');
-          }, 3000);
+          }, type === 'success' ? 8000 : 4000);
         }
 
         let codeTimer;
