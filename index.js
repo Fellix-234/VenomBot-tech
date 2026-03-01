@@ -1222,21 +1222,32 @@ const main = async () => {
   try {
     displayBanner();
     
-    logger.info('🚀 Starting VenomBot...');
+    logger.divider();
+    logger.panel('🚀 VENOMBOT STARTUP SEQUENCE', [
+      chalk.cyan('▸') + ' Initializing deployment environment...',
+    ]);
     
     // Initialize database
     logger.info('📦 Initializing database...');
     await initializeDatabase();
+    logger.database('JSON/MongoDB Fallback', 'connected');
     
     // Load commands
     logger.info('⚙️  Loading commands...');
     await loadCommands();
+    logger.commands(79, 79);
     
     // Connect to WhatsApp
     logger.info('📱 Connecting to WhatsApp...');
     await connectToWhatsApp();
     
     logger.success('✨ Bot is ready!');
+    logger.deployment({
+      port: PORT,
+      env: 'production',
+      bot: config.bot,
+      database: 'JSON (Fallback)',
+    });
     
   } catch (error) {
     logger.error('Failed to start bot:', error.message);
@@ -1252,9 +1263,16 @@ const main = async () => {
 
 // Start HTTP server first (so port is bound immediately)
 const server = app.listen(PORT, '0.0.0.0', () => {
-  logger.info(`🌐 HTTP server running on port ${PORT}`);
-  logger.info(`📱 Scan QR: http://localhost:${PORT}/qr`);
-  logger.info('⏳ Bot is starting in the background...\n');
+  logger.divider();
+  logger.panel('🌐 HTTP SERVER ONLINE', [
+    chalk.green('✓') + ' Server Status: ' + chalk.bold('Active'),
+    chalk.green('✓') + ' Port: ' + chalk.bold(PORT),
+    chalk.green('✓') + ' Interface: ' + chalk.bold('0.0.0.0'),
+    chalk.blue('→') + ' Session: ' + chalk.cyan(`http://localhost:${PORT}/session`),
+    chalk.blue('→') + ' QR Code: ' + chalk.cyan(`http://localhost:${PORT}/qr`),
+    chalk.blue('→') + ' Health: ' + chalk.cyan(`http://localhost:${PORT}/health`),
+  ]);
+  logger.info('⏳ Bot initialization in progress...\n');
 });
 
 // Handle server errors
