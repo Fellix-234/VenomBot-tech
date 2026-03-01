@@ -9,6 +9,7 @@ yarn.lock
 # Session
 auth_info_baileys/
 session/
+multi_sessions/
 *.session
 
 # Database
