@@ -1,6 +1,7 @@
 import { sendText, sendImage } from '../modules/connection.js';
 import { config } from '../config.js';
 import { getCommands } from '../modules/commandHandler.js';
+import { formatUptime, getGreeting } from '../utils/helpers.js';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import fs from 'fs';
@@ -69,16 +70,25 @@ export default {
       cmdByCat[cmd.category].push(cmd);
     });
     
+    const uptime = formatUptime(process.uptime());
+    const ownerTag = config.bot.owner ? `@${config.bot.owner}` : 'Not Configured';
+    const userTag = msg.key.participant || msg.key.remoteJid;
+    const userNumber = (userTag || '').split('@')[0] || 'User';
+
     let text = '';
-    
-    text += `${'═'.repeat(44)}\n`;
-    text += `  🤖 ${config.bot.name} v${config.bot.version}\n`;
-    text += `  Premium WhatsApp Bot\n`;
-    text += `${'═'.repeat(44)}\n\n`;
-    
-    text += `┌────────────────────────────────────────────┐\n`;
-    text += `│ 💬 ${cmdCount} Commands  │ ⏰ 24/7 │ v${config.bot.version} │\n`;
-    text += `└────────────────────────────────────────────┘\n\n`;
+
+    text += `╔════════════════════════════════════════════╗\n`;
+    text += `║            ${config.bot.name.toUpperCase().padEnd(30)}║\n`;
+    text += `║            PROFESSIONAL COMMAND CENTER    ║\n`;
+    text += `╚════════════════════════════════════════════╝\n\n`;
+
+    text += `👋 ${getGreeting()}, *${userNumber}*\n`;
+    text += `🧠 *Version:* ${config.bot.version}\n`;
+    text += `⚡ *Prefix:* ${prefix}\n`;
+    text += `📦 *Commands:* ${cmdCount}\n`;
+    text += `⏱️ *Uptime:* ${uptime}\n`;
+    text += `👑 *Owner:* ${ownerTag}\n`;
+    text += `🔐 *Mode:* ${isOwner ? 'Owner' : 'User'}\n\n`;
     
     const catOrder = ['general', 'admin', 'group', 'media', 'entertainment', 'ai', 'fun', 'tools', 'utility', 'owner'];
     const sortedCats = Object.keys(cmdByCat).sort((a, b) => 
@@ -90,7 +100,7 @@ export default {
       const cmds = cmdByCat[cat];
       const c = categories[cat] || { icon: '📌', title: cat };
       
-      text += `┌─ ${c.icon} ${c.title} ──────────────────────────\n`;
+      text += `┌─ ${c.icon} ${c.title.toUpperCase()} ─────────────────────────\n`;
       text += `├────────────────────────────────────────────\n`;
       
       for (let i = 0; i < cmds.length; i += 2) {
@@ -107,17 +117,20 @@ export default {
       text += `└${'─'.repeat(41)}\n\n`;
     }
     
-    text += `┌─ 🎯 QUICK ACCESS ──────────────────────────\n`;
-    text += `│ ${prefix}help <cmd>  │ ${prefix}play    │ ${prefix}song\n`;
-    text += `│ ${prefix}tiktok     │ ${prefix}twitter  │ ${prefix}tr\n`;
-    text += `│ ${prefix}sticker   │ ${prefix}ai       │ ${prefix}ping\n`;
+    text += `┌─ 🎯 QUICK ACTIONS ─────────────────────────\n`;
+    text += `│ ${prefix}help <cmd>   ${prefix}dashboard   ${prefix}support\n`;
+    text += `│ ${prefix}deploy       ${prefix}ping        ${prefix}info\n`;
+    text += `│ ${prefix}session      ${prefix}owner       ${prefix}uptime\n`;
     text += `└${'─'.repeat(41)}\n\n`;
-    
-    text += `${'─'.repeat(44)}\n`;
-    text += `│ 💻 VenomBot Tech Team\n`;
-    text += `│ 📢 Join Channel: ${config.bot.channel}\n`;
-    text += `${'─'.repeat(44)}\n`;
-    text += `\n💡 ${prefix}help <command>`;
+
+    text += `┌─ ✅ PROFESSIONAL TIPS ─────────────────────\n`;
+    text += `│ • Use ${prefix}help <command> for command details\n`;
+    text += `│ • Use ${prefix}dashboard for live bot health\n`;
+    text += `│ • Use ${prefix}deploy for deployment links\n`;
+    text += `└${'─'.repeat(41)}\n\n`;
+
+    text += `🌐 *Channel:* ${config.bot.channel}\n`;
+    text += `💡 *Need help?* Use ${prefix}support`;
     
     try {
       const menuImg = path.join(assetsPath, 'WhatsApp Image 2026-02-27 at 15.42.21.jpeg');
