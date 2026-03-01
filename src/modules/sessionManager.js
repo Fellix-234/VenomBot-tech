@@ -183,50 +183,82 @@ export const requestPairingCodeForSession = async (sessionId, phoneNumber) => {
     throw new Error('Session not found');
   }
 
-  const cleaned = phoneNumber.toString().replace(/\D/g, '');
+  // Validate and clean phone number
+  let cleaned = phoneNumber.toString().replace(/\D/g, '');
   
   if (cleaned.length < 10 || cleaned.length > 15) {
-    throw new Error('Phone number must be 10-15 digits');
+    throw new Error('Phone number must be 10-15 digits. Example: 254725391914');
   }
 
   if (session.connected) {
     throw new Error('Session already connected');
   }
 
-  // Wait for socket to be ready (max 5 seconds)
+  // Wait for socket to be ready with timeout
   let attempts = 0;
-  while (!session.sock && attempts < 50) {
+  const maxAttempts = 100;
+  while (!session.sock && attempts < maxAttempts) {
     await new Promise(resolve => setTimeout(resolve, 100));
     attempts++;
   }
 
   if (!session.sock) {
-    throw new Error('Socket not ready. Please try again.');
+    throw new Error('Socket not ready. Please try again in a few seconds.');
+  }
+
+  // Ensure socket is not already authenticated
+  if (session.sock.user && session.sock.user.id) {
+    throw new Error('Session already authenticated. Cannot generate pairing code.');
   }
 
   let code;
+  const timeoutMs = 15000; // 15 second timeout for pairing code request
   
   try {
-    if (typeof session.sock.requestPairingCode === 'function') {
-      code = await session.sock.requestPairingCode(cleaned);
-    } else if (typeof session.sock.requestPhoneNumberCode === 'function') {
-      code = await session.sock.requestPhoneNumberCode(cleaned);
-    } else {
-      throw new Error('Pairing code method not available');
+    logger.info(`🔄 Requesting pairing code for ${cleaned} (${attempts * 100}ms socket ready)`);
+    
+    // Create promise with timeout
+    const pairingCodePromise = (async () => {
+      if (typeof session.sock.requestPairingCode === 'function') {
+        logger.info('→ Using requestPairingCode method');
+        return await session.sock.requestPairingCode(cleaned);
+      } else if (typeof session.sock.requestPhoneNumberCode === 'function') {
+        logger.info('→ Using requestPhoneNumberCode method');
+        return await session.sock.requestPhoneNumberCode(cleaned);
+      } else {
+        throw new Error('Pairing code method not available in Baileys');
+      }
+    })();
+
+    // Add timeout
+    const timeoutPromise = new Promise((_, reject) =>
+      setTimeout(() => reject(new Error(`Pairing code request timeout after ${timeoutMs}ms`)), timeoutMs)
+    );
+
+    code = await Promise.race([pairingCodePromise, timeoutPromise]);
+
+    if (!code) {
+      throw new Error('Pairing code is empty or undefined');
     }
 
-    // Ensure code is properly formatted (8 characters, uppercase)
-    if (code) {
-      code = code.toString().toUpperCase().replace(/\s/g, '');
-      
-      // Format as XXXX-XXXX for better readability
-      if (code.length === 8) {
-        code = code.match(/.{1,4}/g).join('-');
-      }
-    }
+    // Return code as-is, don't modify formatting
+    const result = code.toString().trim();
+    logger.success(`✅ Pairing code received: "${result}" (length: ${result.length})`);
+    
+    return result;
   } catch (error) {
-    logger.error(`Pairing code error for ${sessionId}:`, error.message);
-    throw new Error(`Failed to generate pairing code: ${error.message}`);
+    logger.error(`❌ Pairing code error for ${sessionId}:`, error.message);
+    
+    // Provide helpful troubleshooting messages
+    if (error.message.includes('timeout')) {
+      throw new Error('WhatsApp server not responding. Please try again.');
+    } else if (error.message.includes('not available')) {
+      throw new Error('Pairing codes not supported. Update Baileys package or use QR code instead.');
+    } else if (error.message.includes('already authenticated')) {
+      throw new Error('Session already has an active account. Clear the session and try again.');
+    }
+    
+    throw new Error(`Pairing code failed: ${error.message}`);
   }
 
   session.lastActivity = Date.now();

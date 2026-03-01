@@ -282,12 +282,19 @@ app.post('/api/pairing-code', async (req, res) => {
     await createSession(sessionId);
 
     logger.info(`📱 Requesting pairing code for session ${sessionId}: ${phoneNumber}`);
-    const pairingCode = await requestPairingCodeForSession(sessionId, phoneNumber);
+    
+    // Add request timeout (30 seconds)
+    const timeoutPromise = new Promise((_, reject) =>
+      setTimeout(() => reject(new Error('Pairing code request timeout - WhatsApp server not responding')), 30000)
+    );
+    
+    const pairingPromise = requestPairingCodeForSession(sessionId, phoneNumber);
+    const pairingCode = await Promise.race([pairingPromise, timeoutPromise]);
     
     res.json({
       success: true,
       code: pairingCode,
-      message: 'Pairing code generated successfully'
+      message: 'Pairing code generated successfully. Check WhatsApp on your phone.'
     });
   } catch (error) {
     logger.error('Pairing code error:', error.message);
