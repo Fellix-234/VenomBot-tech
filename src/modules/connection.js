@@ -19,6 +19,8 @@ let sock;
 let qrGenerated = false;
 let currentQR = null;
 let botId = null;
+let isConnecting = false;
+let reconnectTimeout = null;
 
 /**
  * Get current QR code data
@@ -29,8 +31,26 @@ export const getCurrentQR = () => currentQR;
  * Initialize WhatsApp connection
  */
 export const connectToWhatsApp = async () => {
-  const { state, saveCreds } = await useMultiFileAuthState(config.paths.session);
-  const { version } = await fetchLatestBaileysVersion();
+  if (isConnecting) {
+    return sock;
+  }
+
+  isConnecting = true;
+
+  let state;
+  let saveCreds;
+  let version;
+
+  try {
+    const authState = await useMultiFileAuthState(config.paths.session);
+    state = authState.state;
+    saveCreds = authState.saveCreds;
+    const latestVersion = await fetchLatestBaileysVersion();
+    version = latestVersion.version;
+  } catch (error) {
+    isConnecting = false;
+    throw error;
+  }
 
   sock = makeWASocket({
     version,
@@ -62,12 +82,17 @@ export const connectToWhatsApp = async () => {
     }
 
     if (connection === 'close') {
-      const shouldReconnect =
-        lastDisconnect?.error?.output?.statusCode !== DisconnectReason.loggedOut;
+      const statusCode = lastDisconnect?.error?.output?.statusCode;
+      const shouldReconnect = statusCode !== DisconnectReason.loggedOut;
 
       if (shouldReconnect) {
-        logger.warn('Connection closed, reconnecting...');
-        setTimeout(() => connectToWhatsApp(), 3000);
+        if (!reconnectTimeout) {
+          logger.warn(`Connection closed (code: ${statusCode || 'unknown'}), reconnecting...`);
+          reconnectTimeout = setTimeout(async () => {
+            reconnectTimeout = null;
+            await connectToWhatsApp();
+          }, 3000);
+        }
       } else {
         logger.error('Connection closed. You are logged out!');
         process.exit(1);
@@ -217,6 +242,7 @@ _Professional WhatsApp Automation_`;
     }
   });
 
+  isConnecting = false;
   return sock;
 };
 
