@@ -17,11 +17,29 @@ const sessions = new Map();
 const sessionTimeouts = new Map();
 const SESSION_TTL = 30 * 60 * 1000; // 30 minutes
 
+// Cool session ID generation words
+const adjectives = [
+  'Phoenix', 'Shadow', 'Storm', 'Thunder', 'Mystic', 'Dragon', 'Phantom', 'Titan',
+  'Blazing', 'Silent', 'Cosmic', 'Neon', 'Void', 'Apex', 'Cyber', 'Quantum',
+  'Rogue', 'Veritas', 'Apex', 'Venom', 'Inferno', 'Nexus'
+];
+
+const nouns = [
+  'Warrior', 'Ninja', 'Knight', 'Cipher', 'Sentinel', 'Agent', 'Master', 'System',
+  'Daemon', 'Echo', 'Ghost', 'Specter', 'Arrow', 'Saber', 'Spirit', 'Force',
+  'Blade', 'Wraith', 'Icon', 'Pulse', 'Spark', 'Vortex'
+];
+
 /**
- * Generate unique session ID
+ * Generate cool standardized session ID
+ * Format: VenomBot-Adjective-RandomCode (e.g., VenomBot-Phoenix-K9A3)
  */
 export const generateSessionId = () => {
-  return crypto.randomBytes(16).toString('hex');
+  const adj = adjectives[Math.floor(Math.random() * adjectives.length)];
+  const randomCode = crypto.randomBytes(2).toString('hex').toUpperCase();
+  const randomNum = Math.floor(Math.random() * 100).toString().padStart(2, '0');
+  
+  return `VenomBot-${adj}-${randomCode}${randomNum}`;
 };
 
 /**
