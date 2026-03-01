@@ -232,14 +232,6 @@ export const requestPairingCodeForSession = async (sessionId, phoneNumber) => {
     
     throw new Error('Unable to generate pairing code. Use QR code method instead.');
   }
-    
-    throw new Error(`Pairing failed: ${error.message}`);
-  }
-
-  session.lastActivity = Date.now();
-  resetSessionTimeout(sessionId);
-  
-  return code;
 };
 
 /**
