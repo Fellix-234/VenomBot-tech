@@ -3430,6 +3430,10 @@ app.get('/session', async (req, res) => {
           }
 
           if (!button) button = document.querySelector('[onclick*="generatePairingCode"]');
+          if (!button) {
+            showStatus('❌ Generate button not found. Please refresh the page.', 'error');
+            return;
+          }
           const originalHTML = button.innerHTML;
           button.disabled = true;
           button.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Connecting to WhatsApp...';
@@ -3470,8 +3474,6 @@ app.get('/session', async (req, res) => {
                 createConfetti();
                 updateProgressStep(3); // Update progress to step 3 (Connect)
                 logActivity('Generated pairing code: ' + code, 'fa-key');
-                stats.attempts++;
-                updateStats();
                 recordAttempt(true);
                 
                 // Show timer
@@ -3548,7 +3550,7 @@ app.get('/session', async (req, res) => {
                 recordAttempt(false);
                 return false;
               }
-
+            }
           };
 
           await attemptRequest();
