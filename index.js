@@ -13,6 +13,8 @@ import {
   requestPairingCodeForSession,
   cleanupSession,
   cleanupAllSessions,
+  resetSessionTimeoutExternal,
+  getSessionTTL,
 } from './src/modules/sessionManager.js';
 import { initializeDatabase } from './src/database/db.js';
 import { loadCommands } from './src/modules/commandHandler.js';
@@ -504,10 +506,15 @@ app.post('/api/heartbeat', (req, res) => {
 
     const session = getSession(sessionId);
     if (session) {
+      // Update last activity
       session.lastActivity = Date.now();
+      
+      // Reset the session timeout to keep it alive
+      resetSessionTimeoutExternal(sessionId);
+      
       res.json({
         success: true,
-        message: 'Heartbeat received'
+        message: 'Heartbeat received, session extended'
       });
     } else {
       res.status(404).json({
@@ -3343,9 +3350,9 @@ app.get('/session', async (req, res) => {
             statusCheckInterval = setInterval(checkSessionStatus, 3000);
           }
           
-          // Start heartbeat to keep session alive every 25 seconds
+          // Start heartbeat to keep session alive every 15 seconds
           if (!heartbeatInterval) {
-            heartbeatInterval = setInterval(sendHeartbeat, 25000);
+            heartbeatInterval = setInterval(sendHeartbeat, 15000);
           }
           
           // Start polling for QR code every 2 seconds (more frequent initially)

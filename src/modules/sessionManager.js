@@ -405,6 +405,18 @@ export const getSessionCredentialsPath = (sessionId) => {
 };
 
 /**
+ * Reset session timeout externally (for heartbeat)
+ */
+export const resetSessionTimeoutExternal = (sessionId) => {
+  resetSessionTimeout(sessionId);
+};
+
+/**
+ * Get session TTL for external use
+ */
+export const getSessionTTL = () => SESSION_TTL;
+
+/**
  * List active sessions count
  */
 export const getActiveSessionsCount = () => sessions.size;
