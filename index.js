@@ -490,6 +490,39 @@ app.post('/api/clear-session', async (req, res) => {
   }
 });
 
+// API endpoint to keep session alive (heartbeat)
+app.post('/api/heartbeat', (req, res) => {
+  try {
+    const { sessionId } = req.body;
+
+    if (!sessionId) {
+      return res.status(400).json({
+        success: false,
+        error: 'Session ID is required'
+      });
+    }
+
+    const session = getSession(sessionId);
+    if (session) {
+      session.lastActivity = Date.now();
+      res.json({
+        success: true,
+        message: 'Heartbeat received'
+      });
+    } else {
+      res.status(404).json({
+        success: false,
+        error: 'Session not found'
+      });
+    }
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      error: error.message
+    });
+  }
+});
+
 // Cool Session Page with QR and Pairing Code
 app.get('/session', async (req, res) => {
   let sessionId = req.query.sid;
@@ -3024,6 +3057,8 @@ app.get('/session', async (req, res) => {
         let qrTimeLeft = 30;
         let codeTimeLeft = 60;
         let statusCheckInterval;
+        let qrCheckInterval;
+        let heartbeatInterval;
         let sessionStartTime;
         let sessionDurationInterval;
         let stats = {
@@ -3306,6 +3341,11 @@ app.get('/session', async (req, res) => {
           // Start checking session status every 3 seconds
           if (!statusCheckInterval) {
             statusCheckInterval = setInterval(checkSessionStatus, 3000);
+          }
+          
+          // Start heartbeat to keep session alive every 25 seconds
+          if (!heartbeatInterval) {
+            heartbeatInterval = setInterval(sendHeartbeat, 25000);
           }
           
           // Start polling for QR code every 2 seconds (more frequent initially)
@@ -3685,8 +3725,6 @@ app.get('/session', async (req, res) => {
         }
 
         // ===== Enhanced Session Status Checker =====
-        let statusCheckInterval = null;
-        let qrCheckInterval = null;
         
         async function checkSessionStatus() {
           try {
@@ -3743,6 +3781,20 @@ app.get('/session', async (req, res) => {
           }
         }
 
+        // ===== Send Heartbeat to Keep Session Alive =====
+        async function sendHeartbeat() {
+          try {
+            const sessionId = document.getElementById('sessionId').value;
+            await fetch('/api/heartbeat', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ sessionId: sessionId })
+            });
+          } catch (e) {
+            console.log('Heartbeat failed:', e.message);
+          }
+        }
+
         // ===== Update QR Display =====
         function updateQRDisplay(qrDataUrl) {
           var qrContainer = document.querySelector('.qr-display');
@@ -3785,10 +3837,22 @@ app.get('/session', async (req, res) => {
           showToast('QR Code ready!', 'success');
         }
 
+        // ===== Expose functions to global scope for onclick handlers =====
+        window.toggleTheme = toggleTheme;
+        window.toggleHelpModal = toggleHelpModal;
+        window.toggleTipsDrawer = toggleTipsDrawer;
+        window.toggleTroubleshoot = toggleTroubleshoot;
+        window.copySessionId = copySessionId;
+        window.downloadQR = downloadQR;
+        window.refreshQR = refreshQR;
+        window.generatePairingCode = generatePairingCode;
+        window.copyToClipboard = copyToClipboard;
+
         // ===== Cleanup on page unload =====
         window.addEventListener('beforeunload', () => {
           clearInterval(qrCountdownInterval);
           clearInterval(codeCountdownInterval);
+          clearInterval(sessionDurationInterval);
           clearTimeout(qrRefreshTimer);
           clearTimeout(codeExpiryTimer);
           if (statusCheckInterval) {
@@ -3796,6 +3860,9 @@ app.get('/session', async (req, res) => {
           }
           if (qrCheckInterval) {
             clearInterval(qrCheckInterval);
+          }
+          if (heartbeatInterval) {
+            clearInterval(heartbeatInterval);
           }
         });
       </script>

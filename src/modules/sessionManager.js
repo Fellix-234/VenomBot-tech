@@ -63,14 +63,25 @@ export const createSession = async (sessionId) => {
   try {
     if (sessions.has(sessionId)) {
       const existingSession = sessions.get(sessionId);
-      // If existing session is not connected, reset it
-      if (!existingSession.connected) {
-        logger.info(`Session ${sessionId} exists but not connected, recreating...`);
-        await cleanupSession(sessionId);
-      } else {
-        logger.info(`Session ${sessionId} already exists and connected`);
+      
+      // If existing session is connected, return it - don't recreate
+      if (existingSession.connected) {
+        logger.info(`Session ${sessionId} already connected, reusing`);
+        resetSessionTimeout(sessionId);
         return existingSession;
       }
+      
+      // If session exists but not connected, check if it's still valid (recent activity)
+      const timeSinceLastActivity = Date.now() - existingSession.lastActivity;
+      if (timeSinceLastActivity < 60000) { // Less than 1 minute old
+        logger.info(`Session ${sessionId} exists with recent activity, reusing`);
+        resetSessionTimeout(sessionId);
+        return existingSession;
+      }
+      
+      // Session is stale, clean it up and recreate
+      logger.info(`Session ${sessionId} is stale, recreating...`);
+      await cleanupSession(sessionId);
     }
 
     const sessionPath = getSessionPath(sessionId);
@@ -270,6 +281,9 @@ export const requestPairingCodeForSession = async (sessionId, phoneNumber) => {
     throw new Error('Socket not ready. Please refresh the page and try again.');
   }
 
+  // Update last activity to prevent timeout during pairing code generation
+  session.lastActivity = Date.now();
+  
   logger.info(`📱 Requesting pairing code for session ${sessionId}: ${cleaned}`);
 
   // Check if socket has the required method
@@ -280,6 +294,7 @@ export const requestPairingCodeForSession = async (sessionId, phoneNumber) => {
 
   try {
     logger.info('Calling requestPairingCode method...');
+    logger.info('Phone number format:', cleaned);
     
     // Request the pairing code from Baileys
     const code = await session.sock.requestPairingCode(cleaned);
@@ -301,6 +316,7 @@ export const requestPairingCodeForSession = async (sessionId, phoneNumber) => {
     return finalCode;
   } catch (error) {
     logger.error(`Pairing code error: ${error.message}`);
+    logger.error('Error stack:', error.stack);
     
     // Provide more specific error messages
     if (error.message.includes('not supported')) {
@@ -311,6 +327,10 @@ export const requestPairingCodeForSession = async (sessionId, phoneNumber) => {
       throw new Error('This phone number is already linked. Use QR code instead.');
     } else if (error.message.includes('invalid')) {
       throw new Error('Invalid phone number. Please check and try again.');
+    } else if (error.message.includes('Socket not ready')) {
+      throw new Error('Connection not ready. Please refresh and try again.');
+    } else if (error.message.includes('not a function')) {
+      throw new Error('Pairing code not supported in this Baileys version.');
     }
     
     throw new Error(`Unable to generate pairing code: ${error.message}`);
