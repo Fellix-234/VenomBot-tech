@@ -293,14 +293,25 @@ export const requestPairingCodeForSession = async (sessionId, phoneNumber) => {
   }
 
   try {
-    logger.info('Calling requestPairingCode method...');
-    logger.info('Phone number format:', cleaned);
+    // Wait for socket to be ready (give it a moment to establish connection)
+    logger.info('Waiting for socket to stabilize before requesting pairing code...');
+    await new Promise(resolve => setTimeout(resolve, 2000));
     
-    // Request the pairing code from Baileys
-    const code = await session.sock.requestPairingCode(cleaned);
+    logger.info('Calling requestPairingCode method...');
+    logger.info('Phone number being used:', cleaned);
+    
+    // Request the pairing code from Baileys with a timeout
+    const timeoutPromise = new Promise((_, reject) =>
+      setTimeout(() => reject(new Error('Pairing code request timed out')), 35000)
+    );
+    
+    const code = await Promise.race([
+      session.sock.requestPairingCode(cleaned),
+      timeoutPromise
+    ]);
     
     if (!code) {
-      throw new Error('No pairing code returned from WhatsApp');
+      throw new Error('No pairing code returned from WhatsApp. Please try again.');
     }
 
     // Format the code (Baileys returns it as a string)
@@ -318,19 +329,21 @@ export const requestPairingCodeForSession = async (sessionId, phoneNumber) => {
     logger.error(`Pairing code error: ${error.message}`);
     logger.error('Error stack:', error.stack);
     
-    // Provide more specific error messages
-    if (error.message.includes('not supported')) {
-      throw new Error('Pairing code not available. Please use the QR code scan method instead.');
-    } else if (error.message.includes('timeout') || error.message.includes('ETIMEDOUT')) {
-      throw new Error('Connection timeout. Please check your internet and try again.');
-    } else if (error.message.includes('already connected')) {
-      throw new Error('This phone number is already linked. Use QR code instead.');
-    } else if (error.message.includes('invalid')) {
-      throw new Error('Invalid phone number. Please check and try again.');
-    } else if (error.message.includes('Socket not ready')) {
-      throw new Error('Connection not ready. Please refresh and try again.');
-    } else if (error.message.includes('not a function')) {
-      throw new Error('Pairing code not supported in this Baileys version.');
+    // Provide more specific error messages based on actual Baileys errors
+    const errorMsg = error.message.toLowerCase();
+    
+    if (errorMsg.includes('not supported')) {
+      throw new Error('Pairing code not available. Please refresh and use the QR code scan method instead.');
+    } else if (errorMsg.includes('timeout') || errorMsg.includes('etimedout')) {
+      throw new Error('Request timed out. Your internet might be slow. Please check your connection and try again.');
+    } else if (errorMsg.includes('already connected') || errorMsg.includes('exist')) {
+      throw new Error('This phone is already registered. Please check the number and try again, or use QR code.');
+    } else if (errorMsg.includes('invalid') || errorMsg.includes('wrong') || errorMsg.includes('check')) {
+      throw new Error('Invalid phone number format. Include country code (e.g., 1 for US, 44 for UK, 91 for India).');
+    } else if (errorMsg.includes('not a function') || errorMsg.includes('undefined')) {
+      throw new Error('Pairing code feature is not available in this Baileys version. Please use QR code instead.');
+    } else if (errorMsg.includes('econnrefused') || errorMsg.includes('network')) {
+      throw new Error('Network connection error. Please check your internet and try again.');
     }
     
     throw new Error(`Unable to generate pairing code: ${error.message}`);

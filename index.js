@@ -3424,7 +3424,7 @@ app.get('/session', async (req, res) => {
           
           // Validate length
           if (cleanedPhone.length < 10 || cleanedPhone.length > 15) {
-            showStatus('❌ Invalid phone format. Use country code + number (10-15 digits total)', 'error');
+            showStatus('❌ Invalid phone format. Use country code + number (10-15 digits total). Example: 14155552671 (US) or 919876543210 (India)', 'error');
             phoneInput.focus();
             return;
           }
@@ -3432,16 +3432,16 @@ app.get('/session', async (req, res) => {
           if (!button) button = document.querySelector('[onclick*="generatePairingCode"]');
           const originalHTML = button.innerHTML;
           button.disabled = true;
-          button.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Connecting to Baileys...';
+          button.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Connecting to WhatsApp...';
 
           let retryCount = 0;
-          const maxRetries = 1; // Allow 1 retry
+          const maxRetries = 2; // Allow up to 2 retries
 
           const attemptRequest = async () => {
             try {
               button.innerHTML = retryCount > 0 ? 
-                '<i class="fas fa-spinner fa-spin"></i> Retrying... (Attempt ' + (retryCount + 1) + ')' :
-                '<i class="fas fa-spinner fa-spin"></i> Generating code...';
+                '<i class="fas fa-spinner fa-spin"></i> Retrying... (Attempt ' + (retryCount + 1) + '/3)' :
+                '<i class="fas fa-spinner fa-spin"></i> Generating code (1/3)...';
 
               const response = await fetch('/api/pairing-code', {
                 method: 'POST',
@@ -3466,11 +3466,13 @@ app.get('/session', async (req, res) => {
                 button.innerHTML = originalHTML;
                 
                 showStatus('✅ Pairing code ready: ' + code + ' (Valid for 60 seconds)', 'success');
+                showToast('Open WhatsApp on your phone and enter the code', 'info');
                 createConfetti();
                 updateProgressStep(3); // Update progress to step 3 (Connect)
                 logActivity('Generated pairing code: ' + code, 'fa-key');
                 stats.attempts++;
                 updateStats();
+                recordAttempt(true);
                 
                 // Show timer
                 document.getElementById('codeTimer').classList.remove('hidden');
@@ -3478,22 +3480,40 @@ app.get('/session', async (req, res) => {
                 
                 playSuccessSound();
                 return true;
+
               } else {
                 const errorMsg = data.error || 'Failed to generate code';
                 
-                // Check if we should retry
+                // Enhanced error handling with specific messages
+                let userFriendlyMsg = errorMsg;
+                
+                if (errorMsg.toLowerCase().includes('check') || 
+                    errorMsg.toLowerCase().includes('invalid phone')) {
+                  userFriendlyMsg = '❌ Invalid phone number. Make sure it includes the country code (e.g., +1, +91, +44). Try entering it as: ' + cleanedPhone;
+                } else if (errorMsg.toLowerCase().includes('timeout')) {
+                  userFriendlyMsg = '❌ Request timed out. Your internet might be slow. Try again.';
+                } else if (errorMsg.toLowerCase().includes('not ready')) {
+                  userFriendlyMsg = '❌ Server not ready. Please refresh the page and try again.';
+                } else if (errorMsg.toLowerCase().includes('network')) {
+                  userFriendlyMsg = '❌ Network error. Check your internet connection.';
+                } else if (errorMsg.toLowerCase().includes('baileys') || errorMsg.toLowerCase().includes('whatsapp')) {
+                  userFriendlyMsg = '❌ WhatsApp connection issue. Try refreshing the page or use QR code instead.';
+                }
+                
+                // Check if we should retry on network/timeout errors
                 if (retryCount < maxRetries && 
-                    (response.status === 503 || 
-                     errorMsg.includes('timeout') || 
-                     errorMsg.includes('not ready'))) {
+                    (response.status === 503 || response.status === 504 ||
+                     errorMsg.toLowerCase().includes('timeout') || 
+                     errorMsg.toLowerCase().includes('not ready') ||
+                     errorMsg.toLowerCase().includes('network'))) {
                   retryCount++;
-                  showToast('Connection issue, retrying...', 'warning');
-                  await new Promise(r => setTimeout(r, 1500)); // Wait 1.5 seconds before retry
+                  showToast('Retrying... (Attempt ' + (retryCount + 1) + ')', 'warning');
+                  await new Promise(r => setTimeout(r, 2000)); // Wait 2 seconds before retry
                   return attemptRequest();
                 } else {
                   button.disabled = false;
                   button.innerHTML = originalHTML;
-                  showStatus('❌ ' + errorMsg, 'error');
+                  showStatus(userFriendlyMsg, 'error');
                   recordAttempt(false);
                   return false;
                 }
@@ -3504,17 +3524,31 @@ app.get('/session', async (req, res) => {
               
               console.error('Pairing code error:', error);
               
-              let userMsg = error.message;
-              if (error.message.includes('Failed to fetch')) {
-                userMsg = 'Network error. Check your internet connection.';
+              let userMsg = 'Unable to generate pairing code';
+              
+              // Better error handling
+              if (error.message.includes('Failed to fetch') || error.message.includes('NetworkError')) {
+                userMsg = '❌ Network error. Check your internet connection and try again.';
               } else if (error.message.includes('timeout')) {
-                userMsg = 'Request timeout. Please try again.';
+                userMsg = '❌ Request timeout. Please try again.';
+              } else if (error.message.includes('abort')) {
+                userMsg = '❌ Request was cancelled. Please try again.';
               }
               
-              showStatus('❌ Error: ' + userMsg, 'error');
-              recordAttempt(false);
-              return false;
-            }
+              // Offer fallback suggestion
+              if (retryCount < maxRetries && 
+                  (userMsg.includes('Network') || userMsg.includes('timeout'))) {
+                showToast('Will retry in a moment...', 'warning');
+                retryCount++;
+                await new Promise(r => setTimeout(r, 2000));
+                return attemptRequest();
+              } else {
+                showStatus(userMsg, 'error');
+                showToast('💡 Tip: If pairing code fails, try the QR scan method instead', 'info');
+                recordAttempt(false);
+                return false;
+              }
+
           };
 
           await attemptRequest();
