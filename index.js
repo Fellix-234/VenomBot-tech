@@ -2733,9 +2733,9 @@ app.get('/session', async (req, res) => {
                     <li>Go to <strong>Settings → Linked Devices</strong></li>
                     <li>Tap <strong>Link a Device</strong></li>
                     <li>Point your phone at this QR code</li>
-                  </ol>
                 </div>
                 </div>
+              </div>
               </div>
 
               <!-- Pairing Code Authentication Section -->
@@ -3114,7 +3114,7 @@ app.get('/session', async (req, res) => {
           
           // Start checking session status every 3 seconds
           if (!statusCheckInterval) {
-            statusCheckInterval = setInterval(checkSessionStatus, 3000);
+            statusCheckInterval = setInterval(checkSessionStatus, 5000); // 5s is enough for status
           }
           
           // Start heartbeat to keep session alive every 15 seconds
@@ -3124,7 +3124,7 @@ app.get('/session', async (req, res) => {
           
           // Start polling for QR code every 2 seconds (more frequent initially)
           if (!qrCheckInterval) {
-            qrCheckInterval = setInterval(checkForQR, 2000);
+            qrCheckInterval = setInterval(checkForQR, 3000); // 3s is better balance
           }
           
           // Initial check for QR code
@@ -3559,9 +3559,8 @@ app.get('/session', async (req, res) => {
               clearInterval(qrCheckInterval);
               statusCheckInterval = null;
               qrCheckInterval = null;
-            } else if (data.success && data.qr && !data.connected) {
-              updateQRDisplay(data.qr);
             }
+            // Removed QR update from here to prevent raw string vs data URL inconsistency
           } catch (error) {
             // Silent fail
           }

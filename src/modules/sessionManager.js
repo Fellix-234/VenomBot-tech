@@ -295,7 +295,7 @@ export const requestPairingCodeForSession = async (sessionId, phoneNumber) => {
   try {
     // Wait for socket to be ready (give it a moment to establish connection)
     logger.info('Waiting for socket to stabilize before requesting pairing code...');
-    await new Promise(resolve => setTimeout(resolve, 2000));
+    await new Promise(resolve => setTimeout(resolve, 1000));
     
     logger.info('Calling requestPairingCode method...');
     logger.info('Phone number being used:', cleaned);
