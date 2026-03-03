@@ -1004,6 +1004,45 @@ app.get('/session', async (req, res) => {
           font-weight: 500;
         }
 
+        /* Method Selector */
+        .method-selector {
+          display: flex;
+          gap: 12px;
+          margin-bottom: 25px;
+          background: rgba(0, 0, 0, 0.2);
+          padding: 6px;
+          border-radius: 14px;
+          border: 1px solid var(--dark-border);
+        }
+
+        .method-btn {
+          flex: 1;
+          padding: 12px;
+          border: none;
+          border-radius: 10px;
+          background: transparent;
+          color: var(--muted-text);
+          font-weight: 600;
+          font-size: 0.9em;
+          cursor: pointer;
+          transition: all 0.3s ease;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          gap: 8px;
+        }
+
+        .method-btn.active {
+          background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+          color: white;
+          box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+        }
+
+        .method-btn:not(.active):hover {
+          background: rgba(255, 255, 255, 0.05);
+          color: var(--light-text);
+        }
+
         /* Button Styles */
         .button-group {
           display: grid;
@@ -1699,40 +1738,29 @@ app.get('/session', async (req, res) => {
           background-size: 200% 100%;
         }
 
-        /* Session Info Box */
-        .session-info {
-          background: linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.1) 100%);
-          padding: 16px;
-          border-radius: 12px;
-          margin-bottom: 20px;
-          border-left: 4px solid #667eea;
-          font-size: 0.9em;
+        /* Session Sections */
+        .auth-section {
+          animation: fadeIn 0.4s ease-out;
         }
 
-        body.light-mode .session-info {
-          background: rgba(102, 126, 234, 0.05);
+        .hidden-section {
+          display: none !important;
         }
 
-        .session-info strong {
-          color: #667eea;
-          display: block;
-          margin-bottom: 8px;
+        /* Card Styles */
+        .card {
+          background: var(--dark-card);
+          border: 1px solid var(--dark-border);
+          border-radius: 20px;
+          padding: 30px;
+          box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+          transition: all 0.3s ease;
         }
 
-        .session-id-badge {
-          background: var(--dark-bg);
-          padding: 6px 12px;
-          border-radius: 6px;
-          font-family: 'Courier New', monospace;
-          font-size: 0.85em;
-          display: inline-block;
-          margin-top: 6px;
-          color: #4ecdc4;
-        }
-
-        body.light-mode .session-id-badge {
-          background: #f3f4f6;
-          color: #667eea;
+        body.light-mode .card {
+          background: white;
+          border-color: var(--light-border);
+          box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
         }
 
         /* Step Progress Indicator */
@@ -2630,28 +2658,28 @@ app.get('/session', async (req, res) => {
               </div>
             </div>
 
-            <!-- Session Info -->
-            <div class="session-info">
-              <strong><i class="fas fa-fingerprint"></i> Your Session ID:</strong>
-              <div class="session-id-badge" onclick="copySessionId()" style="cursor: pointer;" title="Click to copy">
-                ${sessionId}
-              </div>
-              <small style="display: block; margin-top: 8px; color: var(--muted-text);">
-                <i class="fas fa-shield-alt"></i> This session is unique and secure. Keep it private.
-              </small>
+            <!-- Method Selector -->
+            <div class="method-selector">
+              <button type="button" class="method-btn active" id="qrMethodBtn" onclick="switchMethod('qr')">
+                <i class="fas fa-qrcode"></i> QR Code
+              </button>
+              <button type="button" class="method-btn" id="pairingMethodBtn" onclick="switchMethod('pairing')">
+                <i class="fas fa-phone"></i> Pairing Code
+              </button>
             </div>
-
-            <!-- Device Info Section Removed for Simplicity -->
 
             <form id="authForm" class="pairing-form" onsubmit="return false;">
               <input type="hidden" id="sessionId" value="${sessionId}">
 
-              <!-- QR Code Authentication -->
+              <!-- QR Code Authentication Section -->
+              <div id="qrSection" class="auth-section">
               <div class="form-group">
                 <label class="form-label"><i class="fas fa-qrcode"></i> Method 1: Quick QR Scan</label>
                 ${qrImage ? `
                   <div class="qr-display" style="position: relative;">
-                    <img src="${qrImage}" alt="WhatsApp QR Code" id="qrCodeImg" style="max-width: 100%; height: auto;">
+                    <a href="https://api.whatsapp.com" target="_blank" title="Click to Link on WhatsApp" id="qrLink">
+                      <img src="${qrImage}" alt="WhatsApp QR Code" id="qrCodeImg" style="max-width: 100%; height: auto;">
+                    </a>
                     <!-- QR Scanner Animation -->
                     <div class="qr-scanner">
                       <div class="scan-line"></div>
@@ -2662,8 +2690,8 @@ app.get('/session', async (req, res) => {
                     </div>
                   </div>
                   <div style="display: flex; flex-direction: column; gap: 10px; margin-top: 12px;">
-                    <a href="https://web.whatsapp.com" target="_blank" class="btn btn-whatsapp" style="text-decoration: none;">
-                      <i class="fab fa-whatsapp"></i> Link on WhatsApp Web
+                    <a href="https://api.whatsapp.com" target="_blank" class="btn btn-whatsapp" style="text-decoration: none;">
+                      <i class="fab fa-whatsapp"></i> Open WhatsApp to Link
                     </a>
                     <div style="display: flex; gap: 10px;">
                       <button type="button" class="btn btn-secondary" onclick="refreshQR()" style="flex: 1; padding: 12px;">
@@ -2709,12 +2737,10 @@ app.get('/session', async (req, res) => {
                 </div>
               </div>
 
-              <!-- Divider -->
-              <div style="margin: 25px 0; border-top: 2px solid var(--dark-border); opacity: 0.3;"></div>
-
-              <!-- Pairing Code Authentication -->
-              <div class="form-group">
-                <label class="form-label"><i class="fas fa-phone"></i> Method 2: Pairing Code</label>
+              <!-- Pairing Code Authentication Section -->
+              <div id="pairingSection" class="auth-section hidden-section">
+                <div class="form-group">
+                  <label class="form-label"><i class="fas fa-phone"></i> Method 2: Pairing Code</label>
                 <div style="background: var(--dark-bg); padding: 16px; border-radius: 12px; border-left: 4px solid #45b7d1; margin-bottom: 12px;">
                   <small style="color: var(--muted-text); display: block; line-height: 1.6;">
                     <i class="fas fa-lightbulb" style="margin-right: 6px; color: #fbbf24;"></i>
@@ -2767,6 +2793,7 @@ app.get('/session', async (req, res) => {
 
               <!-- Status Message -->
               <div id="statusMessage" class="status"></div>
+              </div>
             </form>
           </div>
         </div>
@@ -3573,8 +3600,10 @@ app.get('/session', async (req, res) => {
             return; // Same QR, no update needed
           }
           
-          // Update QR image
-          var qrHtml = '<img src="' + qrDataUrl + '" alt="WhatsApp QR Code" id="qrCodeImg" style="max-width: 100%; height: auto;">' +
+          // Update QR image with link
+          var qrHtml = '<a href="https://api.whatsapp.com" target="_blank" id="qrLink">' +
+            '<img src="' + qrDataUrl + '" alt="WhatsApp QR Code" id="qrCodeImg" style="max-width: 100%; height: auto;">' +
+            '</a>' +
             '<div class="qr-scanner">' +
             '<div class="scan-line"></div>' +
             '<div class="scan-corner top-left"></div>' +
@@ -3625,24 +3654,57 @@ app.get('/session', async (req, res) => {
             return;
           }
           
-          // Copy to clipboard first
-          copyToClipboard();
-          
-          // Show toast explaining next steps
-          showToast('Code copied! Now paste it in WhatsApp', 'success');
-          
-          // Simple delay before opening WhatsApp
-          setTimeout(() => {
-            const isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
-            if (isMobile) {
-              window.open('whatsapp://', '_blank');
-            } else {
-              window.open('https://web.whatsapp.com', '_blank');
-            }
-          }, 800);
+          // Copy to clipboard
+          const textarea = document.createElement('textarea');
+          textarea.value = code;
+          document.body.appendChild(textarea);
+          textarea.select();
+          try {
+            document.execCommand('copy');
+            showToast('Code copied! Opening WhatsApp...', 'success');
+            logActivity('Copied code and opening WhatsApp', 'fa-copy');
+          } catch (err) {
+            console.error('Copy failed');
+          }
+          document.body.removeChild(textarea);
+
+          // Open WhatsApp immediately (no timeout to avoid popup blockers)
+          const isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+          if (isMobile) {
+            window.location.href = 'whatsapp://';
+            // Fallback for app link
+            setTimeout(() => {
+              window.open('https://api.whatsapp.com', '_blank');
+            }, 500);
+          } else {
+            window.open('https://api.whatsapp.com', '_blank');
+          }
         }
 
         window.openWhatsApp = openWhatsApp;
+
+        // ===== Switch Authentication Method =====
+        function switchMethod(method) {
+          const qrSection = document.getElementById('qrSection');
+          const pairingSection = document.getElementById('pairingSection');
+          const qrBtn = document.getElementById('qrMethodBtn');
+          const pairingBtn = document.getElementById('pairingMethodBtn');
+          
+          if (method === 'qr') {
+            qrSection.classList.remove('hidden-section');
+            pairingSection.classList.add('hidden-section');
+            qrBtn.classList.add('active');
+            pairingBtn.classList.remove('active');
+            logActivity('Switched to QR method', 'fa-qrcode');
+          } else {
+            qrSection.classList.add('hidden-section');
+            pairingSection.classList.remove('hidden-section');
+            qrBtn.classList.remove('active');
+            pairingBtn.classList.add('active');
+            logActivity('Switched to Pairing method', 'fa-phone');
+          }
+        }
+        window.switchMethod = switchMethod;
 
         // ===== Cleanup on page unload =====
         window.addEventListener('beforeunload', () => {
