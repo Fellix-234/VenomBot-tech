@@ -2735,6 +2735,7 @@ app.get('/session', async (req, res) => {
                     <li>Point your phone at this QR code</li>
                   </ol>
                 </div>
+                </div>
               </div>
 
               <!-- Pairing Code Authentication Section -->
@@ -2791,9 +2792,10 @@ app.get('/session', async (req, res) => {
                 </button>
               </div>
 
+              </div>
+
               <!-- Status Message -->
               <div id="statusMessage" class="status"></div>
-              </div>
             </form>
           </div>
         </div>
@@ -2875,6 +2877,7 @@ app.get('/session', async (req, res) => {
 
         function updateActivityDisplay() {
           const activityList = document.getElementById('activityList');
+          if (!activityList) return;
           activityList.innerHTML = '';
           
           activityLog.forEach((item, index) => {
@@ -2893,7 +2896,8 @@ app.get('/session', async (req, res) => {
         // ===== Session Duration Timer =====
         function startSessionTimer() {
           sessionStartTime = new Date();
-          document.getElementById('sessionTimer').style.display = 'inline-flex';
+          const timerEl = document.getElementById('sessionTimer');
+          if (timerEl) timerEl.style.display = 'inline-flex';
           
           sessionDurationInterval = setInterval(() => {
             const now = new Date();
@@ -2903,7 +2907,8 @@ app.get('/session', async (req, res) => {
             const seconds = diff % 60;
             
             const timeStr = [hours, minutes, seconds].map(x => String(x).padStart(2, '0')).join(':');
-            document.getElementById('sessionDuration').textContent = timeStr;
+            const durationEl = document.getElementById('sessionDuration');
+            if (durationEl) durationEl.textContent = timeStr;
           }, 1000);
         }
 
@@ -2932,10 +2937,15 @@ app.get('/session', async (req, res) => {
           const total = stats.attempts;
           const rate = total > 0 ? Math.round((stats.success / total) * 100) : 0;
           
-          document.getElementById('statAttempts').textContent = stats.attempts;
-          document.getElementById('statSuccess').textContent = stats.success;
-          document.getElementById('statFailed').textContent = stats.failed;
-          document.getElementById('statRate').textContent = rate + '%';
+          const attemptsEl = document.getElementById('statAttempts');
+          const successEl = document.getElementById('statSuccess');
+          const failedEl = document.getElementById('statFailed');
+          const rateEl = document.getElementById('statRate');
+
+          if (attemptsEl) attemptsEl.textContent = stats.attempts;
+          if (successEl) successEl.textContent = stats.success;
+          if (failedEl) failedEl.textContent = stats.failed;
+          if (rateEl) rateEl.textContent = rate + '%';
         }
 
         function recordAttempt(success) {
