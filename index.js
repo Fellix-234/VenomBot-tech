@@ -47,7 +47,7 @@ app.get('/', (req, res) => {
   const minutes = Math.floor((uptime % 3600) / 60);
   const seconds = Math.floor(uptime % 60);
   const uptimeFormatted = `${hours}h ${minutes}m ${seconds}s`;
-  
+
   res.send(`
     <!DOCTYPE html>
     <html lang="en">
@@ -241,7 +241,7 @@ app.get('/', (req, res) => {
 });
 
 app.get('/health', (req, res) => {
-  res.json({ 
+  res.json({
     status: 'healthy',
     uptime: process.uptime()
   });
@@ -267,7 +267,7 @@ app.post('/api/pairing-code', async (req, res) => {
         error: 'Session ID is required'
       });
     }
-    
+
     if (!phoneNumber) {
       return res.status(400).json({
         success: false,
@@ -293,18 +293,18 @@ app.post('/api/pairing-code', async (req, res) => {
     }
 
     logger.info(`📱 Requesting pairing code for session ${sessionId}: ${cleanedPhone}`);
-    
+
     // Add request timeout (40 seconds - gives Baileys time to process)
     const timeoutPromise = new Promise((_, reject) =>
       setTimeout(() => reject(new Error('Pairing code request timeout - WhatsApp server not responding. Try again.')), 40000)
     );
-    
+
     try {
       const pairingPromise = requestPairingCodeForSession(sessionId, phoneNumber);
       const pairingCode = await Promise.race([pairingPromise, timeoutPromise]);
-      
+
       logger.success(`Pairing code generated: ${pairingCode}`);
-      
+
       res.json({
         success: true,
         code: pairingCode,
@@ -316,10 +316,10 @@ app.post('/api/pairing-code', async (req, res) => {
     }
   } catch (error) {
     logger.error('Pairing code error:', error.message);
-    
+
     let userError = error.message;
     let statusCode = 500;
-    
+
     // User-friendly error messages
     if (error.message.includes('already connected')) {
       userError = 'Session already connected. Cannot generate pairing code.';
@@ -340,7 +340,7 @@ app.post('/api/pairing-code', async (req, res) => {
       userError = 'Baileys library issue. Try using QR code method instead.';
       statusCode = 503;
     }
-    
+
     res.status(statusCode).json({
       success: false,
       error: userError,
@@ -353,7 +353,7 @@ app.post('/api/pairing-code', async (req, res) => {
 app.get('/api/qr', async (req, res) => {
   try {
     const sessionId = req.query.sessionId;
-    
+
     if (!sessionId) {
       return res.status(400).json({
         success: false,
@@ -368,7 +368,7 @@ app.get('/api/qr', async (req, res) => {
       await createSession(sessionId);
       sessionData = getSession(sessionId);
     }
-    
+
     if (!sessionData) {
       return res.status(500).json({
         success: false,
@@ -377,7 +377,7 @@ app.get('/api/qr', async (req, res) => {
     }
 
     const qrData = sessionData.qr;
-    
+
     if (!qrData) {
       // QR not ready yet - return status to indicate waiting
       return res.json({
@@ -439,7 +439,7 @@ app.get('/api/session-status', (req, res) => {
     }
 
     const status = getSessionStatus(sessionId);
-    
+
     // If session exists but QR is not ready, try to get it
     if (status.exists && !status.qr && !status.connected) {
       const session = getSession(sessionId);
@@ -508,10 +508,10 @@ app.post('/api/heartbeat', (req, res) => {
     if (session) {
       // Update last activity
       session.lastActivity = Date.now();
-      
+
       // Reset the session timeout to keep it alive
       resetSessionTimeoutExternal(sessionId);
-      
+
       res.json({
         success: true,
         message: 'Heartbeat received, session extended'
@@ -598,19 +598,20 @@ app.get('/session', async (req, res) => {
 
         body {
           font-family: 'Poppins', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-          background: linear-gradient(135deg, var(--dark-bg) 0%, var(--dark-card) 50%, #16213e 100%);
+          background: radial-gradient(circle at top right, #1e293b, #0f172a);
           min-height: 100vh;
           display: flex;
           align-items: center;
           justify-content: center;
           padding: 20px;
-          color: var(--light-text);
+          color: #f1f5f9;
           transition: background 0.4s ease;
+          overflow-x: hidden;
         }
 
         body.light-mode {
-          background: linear-gradient(135deg, var(--light-bg) 0%, #f9fafb 50%, #f3f4f6 100%);
-          color: #1f2937;
+          background: radial-gradient(circle at top right, #f8fafc, #f1f5f9);
+          color: #1e293b;
         }
 
         /* Animated background particles */
@@ -680,8 +681,8 @@ app.get('/session', async (req, res) => {
         /* Header */
         .header {
           text-align: center;
-          margin-bottom: 60px;
-          animation: slideDown 0.6s ease-out;
+          margin-bottom: 50px;
+          animation: slideDown 0.8s cubic-bezier(0.16, 1, 0.3, 1);
         }
 
         @keyframes slideDown {
@@ -708,7 +709,7 @@ app.get('/session', async (req, res) => {
 
         @keyframes bounce {
           0%, 100% { transform: translateY(0); }
-          50% { transform: translateY(-15px); }
+          50% { transform: translateY(-10px); }
         }
 
         .header h1 {
@@ -727,8 +728,8 @@ app.get('/session', async (req, res) => {
         }
 
         .header p {
-          font-size: 1.15em;
-          color: var(--muted-text);
+          font-size: 1.1em;
+          color: #94a3b8;
           font-weight: 300;
           letter-spacing: 0.5px;
         }
@@ -746,15 +747,16 @@ app.get('/session', async (req, res) => {
 
         /* Cards */
         .card {
-          background: linear-gradient(135deg, var(--dark-card) 0%, #16213e 100%);
-          border: 1px solid var(--dark-border);
-          border-radius: 20px;
+          background: rgba(30, 41, 59, 0.7);
+          border: 1px solid rgba(255, 255, 255, 0.1);
+          border-radius: 24px;
           padding: 40px;
-          backdrop-filter: blur(10px);
-          transition: all 0.3s ease;
+          backdrop-filter: blur(20px);
+          transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
           animation: fadeIn 0.6s ease-out;
           position: relative;
           overflow: hidden;
+          box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
         }
 
         body.light-mode .card {
@@ -836,6 +838,19 @@ app.get('/session', async (req, res) => {
           font-size: 2.2em;
           color: white;
           line-height: 1;
+        }
+
+        .btn-whatsapp {
+          background: #25d366;
+          color: white;
+          border: none;
+          box-shadow: 0 4px 15px rgba(37, 211, 102, 0.3);
+        }
+
+        .btn-whatsapp:hover {
+          background: #20ba61;
+          transform: translateY(-3px);
+          box-shadow: 0 8px 25px rgba(37, 211, 102, 0.5);
         }
 
         /* QR Code Section */
@@ -2880,14 +2895,19 @@ app.get('/session', async (req, res) => {
                       <div class="scan-corner bottom-right"></div>
                     </div>
                   </div>
-                  <div style="display: flex; gap: 10px; margin-top: 12px;">
-                    <button type="button" class="btn btn-secondary" onclick="refreshQR()" style="flex: 1; padding: 12px;">
-                      <i class="fas fa-sync-alt"></i> Refresh
-                    </button>
-                    <button type="button" class="download-qr-btn tooltip" onclick="downloadQR()" style="flex: 1;">
-                      <i class="fas fa-download"></i> Download
-                      <span class="tooltiptext">Save QR for offline use</span>
-                    </button>
+                  <div style="display: flex; flex-direction: column; gap: 10px; margin-top: 12px;">
+                    <a href="https://web.whatsapp.com" target="_blank" class="btn btn-whatsapp" style="text-decoration: none;">
+                      <i class="fab fa-whatsapp"></i> Link on WhatsApp Web
+                    </a>
+                    <div style="display: flex; gap: 10px;">
+                      <button type="button" class="btn btn-secondary" onclick="refreshQR()" style="flex: 1; padding: 12px;">
+                        <i class="fas fa-sync-alt"></i> Refresh
+                      </button>
+                      <button type="button" class="download-qr-btn tooltip" onclick="downloadQR()" style="flex: 1;">
+                        <i class="fas fa-download"></i> Download
+                        <span class="tooltiptext">Save QR for offline use</span>
+                      </button>
+                    </div>
                   </div>
                   <div id="qrTimer" style="margin-top: 12px;">
                     <p style="color: var(--muted-text); font-size: 0.85em; text-align: center; margin-bottom: 4px;">
@@ -2970,9 +2990,14 @@ app.get('/session', async (req, res) => {
               </div>
 
               <!-- Action Buttons -->
-              <button type="button" class="btn btn-primary" onclick="generatePairingCode(this)" style="width: 100%; padding: 14px; font-size: 1em; margin-bottom: 8px;">
-                <i class="fas fa-bolt"></i> Generate Pairing Code
-              </button>
+              <div style="display: flex; flex-direction: column; gap: 10px;">
+                <button type="button" class="btn btn-primary" onclick="generatePairingCode(this)" style="width: 100%; padding: 14px; font-size: 1em;">
+                  <i class="fas fa-bolt"></i> Generate Pairing Code
+                </button>
+                <button type="button" id="openWhatsAppBtn" class="btn btn-whatsapp hidden" onclick="openWhatsApp()" style="width: 100%; padding: 14px; font-size: 1em;">
+                  <i class="fab fa-whatsapp"></i> Open WhatsApp & Link
+                </button>
+              </div>
 
               <!-- Status Message -->
               <div id="statusMessage" class="status"></div>
@@ -3478,6 +3503,11 @@ app.get('/session', async (req, res) => {
                 
                 // Show timer
                 document.getElementById('codeTimer').classList.remove('hidden');
+                
+                // Show Open WhatsApp button
+                const openWABtn = document.getElementById('openWhatsAppBtn');
+                if (openWABtn) openWABtn.classList.remove('hidden');
+                
                 startCodeExpiryTimer();
                 
                 playSuccessSound();
@@ -3891,6 +3921,35 @@ app.get('/session', async (req, res) => {
         window.generatePairingCode = generatePairingCode;
         window.copyToClipboard = copyToClipboard;
 
+        // ===== Open WhatsApp & Copy Code =====
+        function openWhatsApp() {
+          const codeEl = document.getElementById('pairingCode');
+          const code = codeEl.textContent;
+          
+          if (code.includes('Generate') || code.includes('Code') || code.includes('expired')) {
+            showToast('Please generate a code first', 'warning');
+            return;
+          }
+          
+          // Copy to clipboard first
+          copyToClipboard();
+          
+          // Show toast explaining next steps
+          showToast('Code copied! Now paste it in WhatsApp', 'success');
+          
+          // Simple delay before opening WhatsApp
+          setTimeout(() => {
+            const isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+            if (isMobile) {
+              window.open('whatsapp://', '_blank');
+            } else {
+              window.open('https://web.whatsapp.com', '_blank');
+            }
+          }, 800);
+        }
+
+        window.openWhatsApp = openWhatsApp;
+
         // ===== Cleanup on page unload =====
         window.addEventListener('beforeunload', () => {
           clearInterval(qrCountdownInterval);
@@ -3940,22 +3999,22 @@ process.on('SIGINT', async () => {
 const main = async () => {
   try {
     displayBanner();
-    
+
     logger.divider();
     logger.panel('🚀 VENOMBOT STARTUP SEQUENCE', [
       chalk.cyan('▸') + ' Initializing deployment environment...',
     ]);
-    
+
     // Initialize database
     logger.info('📦 Initializing database...');
     await initializeDatabase();
     logger.database('JSON/MongoDB Fallback', 'connected');
-    
+
     // Load commands
     logger.info('⚙️  Loading commands...');
     await loadCommands();
     logger.commands(79, 79);
-    
+
     // Optional single-account main bot connection
     if (config.settings.mainBotEnabled) {
       logger.info('📱 Connecting to WhatsApp (main bot mode)...');
@@ -3964,7 +4023,7 @@ const main = async () => {
       logger.info('🧩 Session panel mode active (MAIN_BOT_ENABLED=false)');
       logger.info('📝 Staff should connect via /session with their own Session ID');
     }
-    
+
     logger.success('✨ Bot is ready!');
     logger.deployment({
       port: PORT,
@@ -3972,7 +4031,7 @@ const main = async () => {
       bot: config.bot,
       database: 'JSON (Fallback)',
     });
-    
+
   } catch (error) {
     logger.error('Failed to start bot:', error.message);
     logger.error('Stack:', error.stack);
