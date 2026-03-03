@@ -15,6 +15,7 @@ export const config = {
     timezone: process.env.TIMEZONE || 'Asia/Kolkata',
     version: '2.0.0',
     channel: process.env.CHANNEL_LINK || 'https://whatsapp.com/channel/yourchannel',
+    repo: 'https://github.com/Fellix-234/VenomBot-Tech',
   },
 
   // Database Configuration

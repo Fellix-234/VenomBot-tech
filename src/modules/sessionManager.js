@@ -158,6 +158,10 @@ export const createSession = async (sessionId) => {
               `🆔 *Your Session ID:*\n\`\`\`${sessionId}\`\`\`\n\n` +
               `📱 *Bot ID:* ${sessionData.botId}\n` +
               `🕒 *Connected at:* ${new Date().toLocaleString()}\n\n` +
+              `🚀 *Support the Project:*\n` +
+              `⭐ *Star:* ${config.bot.repo}\n` +
+              `🍴 *Fork:* ${config.bot.repo}/fork\n` +
+              `📢 *Channel:* ${config.bot.channel}\n\n` +
               `Keep this Session ID private and secure!\n\n` +
               `Type *!help* to see available commands.`;
             

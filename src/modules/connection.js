@@ -180,6 +180,9 @@ Type *${config.bot.prefix}help* to view all available commands
 🌐 Need support? Visit our channel!
 ${config.bot.channel}
 
+⭐ Star the Repo: ${config.bot.repo}
+🍴 Fork the Repo: ${config.bot.repo}/fork
+
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 _Powered by ${config.bot.name} v${config.bot.version}_
