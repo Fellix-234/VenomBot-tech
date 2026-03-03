@@ -614,35 +614,8 @@ app.get('/session', async (req, res) => {
           color: #1e293b;
         }
 
-        /* Animated background particles */
-        .particles {
-          position: fixed;
-          top: 0;
-          left: 0;
-          width: 100%;
-          height: 100%;
-          pointer-events: none;
-          overflow: hidden;
-          z-index: -1;
-        }
-
-        .particle {
-          position: absolute;
-          pointer-events: none;
-          opacity: 0.5;
-        }
-
-        @keyframes float {
-          0%, 100% { transform: translateY(0px) rotate(0deg); }
-          50% { transform: translateY(-20px) rotate(180deg); }
-        }
-
-        .particle {
-          animation: float ${3 + Math.random() * 4}s infinite ease-in-out;
-        }
-
         .container {
-          max-width: 1200px;
+          max-width: 500px;
           width: 100%;
           position: relative;
           z-index: 1;
@@ -734,15 +707,10 @@ app.get('/session', async (req, res) => {
           letter-spacing: 0.5px;
         }
 
-        /* Grid Layout */
         .grid {
           display: grid;
           grid-template-columns: 1fr;
-          gap: 40px;
-          margin-bottom: 40px;
-          max-width: 700px;
-          margin-left: auto;
-          margin-right: auto;
+          gap: 20px;
         }
 
         /* Cards */
@@ -1185,8 +1153,7 @@ app.get('/session', async (req, res) => {
           display: flex;
           gap: 15px;
           justify-content: center;
-          margin-top: 25px;
-          flex-wrap: wrap;
+          margin-top: 20px;
         }
 
         .social-btn {
@@ -2559,132 +2526,10 @@ app.get('/session', async (req, res) => {
       <!-- Toast Notification Container -->
       <div id="toastContainer" class="toast-container"></div>
 
-      <!-- Tips Drawer -->
-      <div id="tipsDrawer" class="tips-drawer">
-        <div class="tips-drawer-header">
-          <div class="tips-drawer-title"><i class="fas fa-lightbulb"></i> Security Tips</div>
-          <button class="tips-drawer-close" onclick="toggleTipsDrawer()">×</button>
-        </div>
-        <div class="tips-content">
-          <div class="tip-item">
-            <div class="tip-title"><i class="fas fa-lock"></i> Never Share Session ID</div>
-            <div class="tip-text">Your session ID is like a password. Keep it private and never share it with anyone.</div>
-          </div>
-          <div class="tip-item">
-            <div class="tip-title"><i class="fas fa-qrcode"></i> QR Code Safety</div>
-            <div class="tip-text">Only scan QR codes from trusted sources. Never screenshot and share QR codes.</div>
-          </div>
-          <div class="tip-item">
-            <div class="tip-title"><i class="fas fa-shield-alt"></i> Connection Security</div>
-            <div class="tip-text">Always use HTTPS connections. This page is secured with encryption.</div>
-          </div>
-          <div class="tip-item">
-            <div class="tip-title"><i class="fas fa-clock"></i> Session Expiry</div>
-            <div class="tip-text">Sessions expire for security. Generate a new session if your code expires.</div>
-          </div>
-          <div class="tip-item">
-            <div class="tip-title"><i class="fas fa-exclamation-triangle"></i> Suspicious Activity</div>
-            <div class="tip-text">If you notice unusual activity, clear the session and start fresh.</div>
-          </div>
-          <div class="tip-item">
-            <div class="tip-title"><i class="fas fa-mobile-alt"></i> Device Security</div>
-            <div class="tip-text">Keep your phone charger disconnected while in sensitive areas.</div>
-          </div>
-          <div class="tip-item">
-            <div class="tip-title"><i class="fas fa-check-circle"></i> Best Practices</div>
-            <div class="tip-text">Always verify the session details after connecting. Use strong passwords.</div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Troubleshooting Modal -->
-      <div id="troubleshootModal" class="troubleshoot-modal">
-        <div class="troubleshoot-content">
-          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px;">
-            <h2 style="color: #667eea; font-size: 1.8em;"><i class="fas fa-wrench"></i> Troubleshooting Guide</h2>
-            <button onclick="toggleTroubleshoot()" style="background: transparent; border: none; font-size: 1.8em; cursor: pointer; color: #667eea;">×</button>
-          </div>
-          
-          <div class="trouble-item">
-            <div class="trouble-q"><i class="fas fa-question-circle"></i> QR Code Not Working?</div>
-            <div class="trouble-a">
-              • Check if your WhatsApp is updated to the latest version<br>
-              • Make sure you have a stable internet connection<br>
-              • Try refreshing the QR code by clicking the Refresh button<br>
-              • Use Method 2 (Pairing Code) if QR continues to fail
-            </div>
-          </div>
-
-          <div class="trouble-item">
-            <div class="trouble-q"><i class="fas fa-question-circle"></i> Pairing Code Expired?</div>
-            <div class="trouble-a">
-              • Pairing codes are only valid for 60 seconds<br>
-              • Generate a new code immediately when you're ready<br>
-              • Enter the code within 60 seconds in WhatsApp<br>
-              • If time runs out, the code will expire and you need a new one
-            </div>
-          </div>
-
-          <div class="trouble-item">
-            <div class="trouble-q"><i class="fas fa-question-circle"></i> Session ID Not Copying?</div>
-            <div class="trouble-a">
-              • Click directly on the Session ID badge<br>
-              • Check if your browser allows clipboard access<br>
-              • If using old browser, enable clipboard permissions<br>
-              • Manually select and copy the session ID
-            </div>
-          </div>
-
-          <div class="trouble-item">
-            <div class="trouble-q"><i class="fas fa-question-circle"></i> Connection Keeps Failing?</div>
-            <div class="trouble-a">
-              • Ensure your internet connection is stable<br>
-              • Try clearing browser cache and cookies<br>
-              • Disconnect and reconnect to WiFi<br>
-              • Try using mobile data instead of WiFi<br>
-              • Contact support if issue persists
-            </div>
-          </div>
-
-          <div class="trouble-item">
-            <div class="trouble-q"><i class="fas fa-question-circle"></i> Page Not Loading?</div>
-            <div class="trouble-a">
-              • Refresh the page (Ctrl+R or Cmd+R)<br>
-              • Clear browser cache (Ctrl+Shift+Delete)<br>
-              • Try a different browser (Chrome, Edge, Safari)<br>
-              • Disable browser extensions and try again
-            </div>
-          </div>
-
-          <div class="trouble-item">
-            <div class="trouble-q"><i class="fas fa-question-circle"></i> Getting Error Messages?</div>
-            <div class="trouble-a">
-              • Note the error message and error code<br>
-              • Try the action again after a few seconds<br>
-              • Check WhatsApp is not open on your phone<br>
-              • Generate a new session and try again
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- FAB Menu -->
-      <div class="fab-menu">
-        <button class="fab tips" onclick="toggleTipsDrawer()" title="Security Tips">
-          <i class="fas fa-bulb"></i>
-        </button>
-        <button class="fab" onclick="toggleTroubleshoot()" title="Troubleshooting">
-          <i class="fas fa-wrench"></i>
-        </button>
-      </div>
-
-      <!-- Particles Background -->
-      <div class="particles" id="particlesContainer"></div>
-
       <!-- Connection Status Indicator -->
       <div class="status-indicator">
         <div class="status-dot connected" id="statusDot"></div>
-        <span id="statusText">Connected</span>
+        <span id="statusText">System Active</span>
       </div>
 
       <!-- Theme Toggle Button -->
@@ -2692,59 +2537,6 @@ app.get('/session', async (req, res) => {
         <i class="fas fa-moon" id="themeIcon"></i>
         <span class="tooltiptext">Switch Theme</span>
       </button>
-
-      <!-- Help Button -->
-      <div class="help-icon tooltip" onclick="toggleHelpModal()">
-        <i class="fas fa-question"></i>
-        <span class="tooltiptext">Need Help?</span>
-      </div>
-
-      <!-- Help Modal -->
-      <div id="helpModal" class="modal">
-        <div class="modal-content">
-          <div class="modal-header">
-            <h2 class="modal-title"><i class="fas fa-info-circle"></i> How to Connect</h2>
-            <button class="modal-close" onclick="toggleHelpModal()">×</button>
-          </div>
-          <div style="line-height: 1.8; color: var(--muted-text);">
-            <h3 style="color: #667eea; margin-top: 20px;"><i class="fas fa-qrcode"></i> Method 1: QR Code (Recommended)</h3>
-            <ol style="margin-left: 20px; margin-top: 10px;">
-              <li>Open WhatsApp on your phone</li>
-              <li>Tap <strong>Menu</strong> or <strong>Settings</strong></li>
-              <li>Select <strong>Linked Devices</strong></li>
-              <li>Tap <strong>Link a Device</strong></li>
-              <li>Point your phone at the QR code on this page</li>
-              <li>Wait for confirmation</li>
-            </ol>
-
-            <h3 style="color: #667eea; margin-top: 25px;"><i class="fas fa-mobile-alt"></i> Method 2: Pairing Code</h3>
-            <ol style="margin-left: 20px; margin-top: 10px;">
-              <li>Enter your WhatsApp phone number with country code</li>
-              <li>Click <strong>Generate Pairing Code</strong></li>
-              <li>Open WhatsApp → <strong>Settings</strong> → <strong>Linked Devices</strong></li>
-              <li>Tap <strong>Link with Phone Number</strong> instead</li>
-              <li>Enter the 8-digit code shown on this page</li>
-              <li>Code expires in 60 seconds</li>
-            </ol>
-
-            <h3 style="color: #667eea; margin-top: 25px;"><i class="fas fa-keyboard"></i> Keyboard Shortcuts</h3>
-            <ul style="margin-left: 20px; margin-top: 10px; list-style: none;">
-              <li><kbd style="background: var(--dark-bg); padding: 2px 8px; border-radius: 4px; font-size: 0.9em;">Enter</kbd> - Generate pairing code</li>
-              <li><kbd style="background: var(--dark-bg); padding: 2px 8px; border-radius: 4px; font-size: 0.9em;">Ctrl+C</kbd> - Copy code to clipboard</li>
-            </ul>
-
-            <div style="background: linear-gradient(135deg, rgba(78, 205, 196, 0.1) 0%, rgba(69, 183, 209, 0.1) 100%); padding: 15px; border-radius: 10px; margin-top: 25px; border-left: 4px solid #4ecdc4;">
-              <strong style="color: #4ecdc4;"><i class="fas fa-lightbulb"></i> Pro Tips:</strong>
-              <ul style="margin-left: 20px; margin-top: 8px;">
-                <li>Click the pairing code to copy it instantly</li>
-                <li>Download QR code for offline use</li>
-                <li>QR refreshes automatically if not scanned</li>
-                <li>Use dark mode for better viewing at night</li>
-              </ul>
-            </div>
-          </div>
-        </div>
-      </div>
 
       <!-- Success Screen Overlay -->
       <div id="successScreen" class="success-screen">
@@ -2849,33 +2641,7 @@ app.get('/session', async (req, res) => {
               </small>
             </div>
 
-            <!-- Device Info -->
-            <div class="device-info">
-              <div class="device-info-title">
-                <i class="fas fa-laptop"></i> Device Information
-                <span class="badge badge-info">LIVE</span>
-              </div>
-              <div class="device-info-grid">
-                <div class="device-info-item">
-                  <span class="device-info-label">Browser</span>
-                  <span class="device-info-value" id="deviceBrowser">Detecting...</span>
-                </div>
-                <div class="device-info-item">
-                  <span class="device-info-label">Platform</span>
-                  <span class="device-info-value" id="devicePlatform">Detecting...</span>
-                </div>
-                <div class="device-info-item">
-                  <span class="device-info-label">Screen</span>
-                  <span class="device-info-value" id="deviceScreen">Detecting...</span>
-                </div>
-                <div class="device-info-item">
-                  <span class="device-info-label">Connection</span>
-                  <span class="device-info-value">
-                    <span class="badge badge-success" id="deviceConnection">Secure</span>
-                  </span>
-                </div>
-              </div>
-            </div>
+            <!-- Device Info Section Removed for Simplicity -->
 
             <form id="authForm" class="pairing-form" onsubmit="return false;">
               <input type="hidden" id="sessionId" value="${sessionId}">
@@ -2995,73 +2761,12 @@ app.get('/session', async (req, res) => {
                   <i class="fas fa-bolt"></i> Generate Pairing Code
                 </button>
                 <button type="button" id="openWhatsAppBtn" class="btn btn-whatsapp hidden" onclick="openWhatsApp()" style="width: 100%; padding: 14px; font-size: 1em;">
-                  <i class="fab fa-whatsapp"></i> Open WhatsApp & Link
+                  <i class="fab fa-whatsapp"></i> Link with Phone Number
                 </button>
               </div>
 
               <!-- Status Message -->
               <div id="statusMessage" class="status"></div>
-
-              <!-- Instructions -->
-              <div class="instructions" style="margin-top: 20px;">
-                <strong style="color: #45b7d1;"><i class="fas fa-book-open"></i> Using Pairing Code:</strong>
-                <ol>
-                  <li>Enter your WhatsApp phone number above</li>
-                  <li>Click <strong>Generate Pairing Code</strong></li>
-                  <li>Open WhatsApp → <strong>Settings → Linked Devices → Link with Phone Number</strong></li>
-                  <li>Enter the 8-digit code within 60 seconds</li>
-                  <li>Your device will be linked immediately</li>
-                </ol>
-              </div>
-
-              <!-- Stats Dashboard -->
-              <div style="margin-top: 25px;">
-                <div style="font-size: 1.1em; font-weight: 600; color: #667eea; margin-bottom: 12px; display: flex; align-items: center; gap: 8px;">
-                  <i class="fas fa-chart-bar"></i> Connection Statistics
-                </div>
-                <div class="stats-grid">
-                  <div class="stat-card">
-                    <span class="stat-value" id="statAttempts">0</span>
-                    <div class="stat-label">Attempts</div>
-                  </div>
-                  <div class="stat-card">
-                    <span class="stat-value" id="statSuccess">0</span>
-                    <div class="stat-label">Success</div>
-                  </div>
-                  <div class="stat-card">
-                    <span class="stat-value" id="statFailed">0</span>
-                    <div class="stat-label">Failed</div>
-                  </div>
-                  <div class="stat-card">
-                    <span class="stat-value" id="statRate">0%</span>
-                    <div class="stat-label">Success Rate</div>
-                  </div>
-                </div>
-              </div>
-
-              <!-- Activity Log -->
-              <div class="activity-log">
-                <div class="activity-log-title">
-                  <i class="fas fa-history"></i> Recent Activity
-                </div>
-                <div id="activityList">
-                  <div class="activity-item" style="opacity: 0.6;">
-                    <div class="activity-icon"><i class="fas fa-info-circle" style="color: #667eea;"></i></div>
-                    <div class="activity-content">
-                      <div class="activity-action">Session created</div>
-                      <div class="activity-time">Just now</div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              <!-- Session Duration Timer -->
-              <div style="margin-top: 20px; text-align: center;">
-                <div class="session-timer" id="sessionTimer" style="display: none;">
-                  <i class="fas fa-hourglass-start"></i>
-                  <span>Session Duration: <span id="sessionDuration">00:00</span></span>
-                </div>
-              </div>
             </form>
           </div>
         </div>
@@ -3806,16 +3511,11 @@ app.get('/session', async (req, res) => {
             const data = await response.json();
             
             if (data.success && data.status === 'connected') {
-              // Update progress to step 3
-              updateProgressStep(3);
-              
-              // Show success screen after a brief delay
-              setTimeout(() => {
-                showSuccessScreen({
-                  sessionId: sessionId,
-                  timestamp: new Date()
-                });
-              }, 500);
+              // Show success screen
+              showSuccessScreen({
+                sessionId: sessionId,
+                timestamp: new Date()
+              });
               
               // Stop checking
               clearInterval(statusCheckInterval);
@@ -3823,15 +3523,13 @@ app.get('/session', async (req, res) => {
               statusCheckInterval = null;
               qrCheckInterval = null;
             } else if (data.success && data.qr && !data.connected) {
-              // QR code is now available, generate the image
               updateQRDisplay(data.qr);
             }
           } catch (error) {
-            // Silent fail, will retry
+            // Silent fail
           }
         }
 
-        // ===== Dedicated QR Code Polling =====
         async function checkForQR() {
           try {
             const sessionId = document.getElementById('sessionId').value;
@@ -3840,14 +3538,10 @@ app.get('/session', async (req, res) => {
             
             if (data.success && data.qr) {
               updateQRDisplay(data.qr);
-              // Stop polling once we have the QR
               if (qrCheckInterval) {
                 clearInterval(qrCheckInterval);
                 qrCheckInterval = null;
               }
-            } else if (data.waiting) {
-              // Still waiting for QR, continue polling
-              logActivity('Waiting for QR code...', 'fa-clock');
             }
           } catch (error) {
             console.error('QR check error:', error);
